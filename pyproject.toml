@@ -1,0 +1,47 @@
+[build-system]
+requires = ["hatchling>=1.27,<2"]
+build-backend = "hatchling.build"
+
+[project]
+name = "execution-feedback-code-repair"
+version = "0.1.0"
+description = "A leakage-aware benchmark for execution-feedback-guided Python code repair."
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = []
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.0,<10",
+  "ruff>=0.6,<1",
+]
+data = [
+  "datasets>=3.0,<6",
+]
+model = [
+  "accelerate>=1.0,<2",
+  "transformers>=4.46,<5",
+]
+train = [
+  "accelerate>=1.0,<2",
+  "bitsandbytes>=0.43,<1",
+  "datasets>=3.0,<6",
+  "peft>=0.13,<1",
+  "transformers>=4.46,<5",
+  "trl>=0.24,<2",
+]
+
+[project.scripts]
+repairbench = "repairbench.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/repairbench"]
+
+[tool.pytest.ini_options]
+addopts = "-q"
+pythonpath = ["src"]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"

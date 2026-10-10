@@ -1,0 +1,33 @@
+{
+  "seed": 42,
+  "rows": 1241,
+  "source_counts": {
+    "synthetic_mutations": 772,
+    "model_generated_errors": 469
+  },
+  "synthetic_quotas": {
+    "boundary_condition": 122,
+    "logic_error": 267,
+    "runtime_error": 383
+  },
+  "bug_type_counts": {
+    "boundary_condition": 122,
+    "logic_error": 267,
+    "model_logic_error": 297,
+    "model_runtime_error": 171,
+    "model_timeout_error": 1,
+    "runtime_error": 383
+  },
+  "tasks": 333,
+  "excluded_cross_source_prompt_duplicates": 0,
+  "outputs": {
+    "sft": {
+      "path": "data/processed/mbpp/train_sft_mixed_controlled.jsonl",
+      "sha256": "022b1b49d19f52481eeb22a9b0c172bb4781de26ff8101cb4bf893d8d5ea47c4"
+    },
+    "bugs": {
+      "path": "data/processed/mbpp/train_bugs_mixed_controlled.jsonl",
+      "sha256": "17e925081f4e0d1c7c23bc22162ba185bf995b08c4c9d8a496a62ebb910aeab1"
+    }
+  }
+}

@@ -1,0 +1,8 @@
+# Exact top-level versions used for the reported RTX 3090 QLoRA experiment.
+# Install requirements/torch-cu121.txt first on the original CUDA 12.1 setup.
+accelerate==1.15.0
+bitsandbytes==0.50.2
+datasets==5.0.1
+peft==0.21.1
+transformers==4.56.2
+trl==1.14.1

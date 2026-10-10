@@ -1,0 +1,29 @@
+.venv*/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+build/
+dist/
+*.egg-info/
+.idea/
+.vscode/
+.env
+*.pem
+
+# Keep only compact, reviewable evidence in Git. Raw generations and binaries
+# remain local because they are large and may contain generated code.
+artifacts/*
+!artifacts/experiment_report.md
+!artifacts/humanevalfix_atomized_full_comparison.json
+!artifacts/humanevalfix_atomized_k3_feedback_ablation.json
+!artifacts/train_sft_mixed_controlled_manifest.json
+!artifacts/train_sft_mixed_controlled_quality.md
+
+outputs/
+models/
+logs/
+data/processed/
+data/raw/
