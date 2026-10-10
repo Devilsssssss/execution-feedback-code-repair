@@ -1,0 +1,19 @@
+{
+  "input_cases": 143,
+  "repair_at_1_successes": 71,
+  "repair_at_k_successes": 75,
+  "later_success_samples": 4,
+  "by_repair_index": {
+    "2": 2,
+    "3": 2
+  },
+  "by_bug_type": {
+    "excess_logic": 1,
+    "missing_logic": 1,
+    "operator_misuse": 1,
+    "variable_misuse": 1
+  },
+  "output": "data\\processed\\on_policy\\humanevalfix_later_success_sft.jsonl",
+  "output_sha256": "dfdcb529022c6f02d94e9416a8b2b811dc6a2e9b89fe075b3e5a9f92f95bc0c0",
+  "training_decision": "insufficient_samples"
+}

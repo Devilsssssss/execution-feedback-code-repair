@@ -35,11 +35,16 @@ tests/                  评测可信性与核心流程测试
 
 等规模混合数据在两种提示条件下都增加 30 个成功案例：无反馈配对 McNemar `p=2.27e-7`，结构化反馈 `p=6.04e-7`。但混合模型的无反馈 72/143 与结构化反馈 71/143 没有显著差异（`p=1.0`）；最多三轮时也只是 77/143 与 75/143（`p=0.804`）。因此证据支持**训练错误分布改进**，不支持“模型已学会有效使用执行反馈”。
 
+后续增加了 5 个反馈置乱对照（seed 42–46）：每次都将 143 条反馈做无自配对的一一置换。正确反馈为 71/143，5 次置乱分别为 64、69、59、65、65/143，均值 64.4/143（45.0%），范围 59–69。虽然 5 次都低于正确反馈，但逐次配对检验只有 1/5 在未校正条件下达到 `p<0.05`，结果对置乱方式较敏感；而且无反馈仍为 72/143。因此它提示反馈内容会影响输出，但仍不能证明反馈带来稳定净收益。
+
 可直接复核的 Git 内产物：
 
 - `artifacts/experiment_report.md`：完整结论、局限和下一步；
 - `artifacts/humanevalfix_atomized_full_comparison.json`：六组单轮配对统计；
 - `artifacts/humanevalfix_atomized_k3_feedback_ablation.json`：三轮反馈消融；
+- `artifacts/humanevalfix_feedback_shuffle_multiseed_comparison.json`：5 个置乱 seed 的逐例配对统计；
+- `artifacts/humanevalfix_feedback_shuffle_multiseed_summary.json`：置乱映射完整性、汇总指标与结论边界；
+- `artifacts/on_policy_later_success_summary.json`：后续成功轨迹的数量与类型汇总；
 - `artifacts/train_sft_mixed_controlled_manifest.json`：1241 条混合数据的来源、数量与哈希；
 - `artifacts/train_sft_mixed_controlled_quality.md`：训练前质量审计。
 
@@ -404,7 +409,33 @@ repairbench evaluate `
 
 反馈消融得到负结果：混合模型无反馈 72/143、结构化反馈 71/143（`p=1.0`）；最多三轮时 `repair@3` 分别为 77/143 和 75/143（`p=0.804`）。因此当前证据支持“模型真实错误改善训练分布”，不支持“模型已经学会有效使用执行反馈”。完整解读见 `artifacts/experiment_report.md`。
 
-需要诚实说明：HumanEvalFix 已在开发中被查看，不是最终盲测；目前只有一个训练 seed、模型规模和混合比例；混合时同时加入模型错误并减少合成运行时错误，尚不能拆分两者各自贡献。下一步应构造第一轮失败候选到第二轮成功修复的 on-policy 轨迹，并在从未用于开发的新修复集上验证。
+### 反馈置乱与 on-policy 轨迹
+
+为直接检查模型是否依赖反馈内容，使用 seed 42–46 将 143 条初始执行反馈分别进行 5 次确定性置换。每个映射都包含 143 个唯一来源且没有自配对，保持反馈集合不变，仅破坏反馈和当前代码的对应关系。5 次置乱的 `repair@1` 为 64、69、59、65、65/143，均值 64.4/143（45.0%），范围 59–69；正确反馈为 71/143（49.7%）。5 次结果都更低，但逐次 McNemar 检验的 `p` 值为 0.143、0.832、0.0169、0.180、0.263，只有 1/5 在未校正条件下小于 0.05。因此这是“模型对反馈内容存在方向性敏感”的探索性证据，不是稳定反馈收益的证明。
+
+从结构化反馈三轮结果中提取“第一轮失败、后续通过公开与隐藏测试”的轨迹，只得到 4 条，其中第 2 轮成功 2 条、第 3 轮成功 2 条，覆盖 excess logic、missing logic、operator misuse 和 variable misuse 各 1 条。该规模不足以支持一次可信的新增微调，因此项目没有用 4 条样本继续训练并宣称提升。
+
+```powershell
+# 对 seed 42–46 分别运行；下面以 seed 42 为例
+repairbench evaluate `
+  --tasks data/processed/humanevalfix_atomized/audited_tasks.jsonl `
+  --bugs data/processed/humanevalfix_atomized/audited_bugs.jsonl `
+  --model-id models/qwen2.5-coder-0.5b-instruct `
+  --adapter-id outputs/qwen25-coder-05b-repair-qlora-mixed-controlled `
+  --condition structured `
+  --max-repairs 1 `
+  --max-new-tokens 256 `
+  --executor bwrap `
+  --shuffle-feedback-seed 42 `
+  --output artifacts/humanevalfix_atomized_mixed_structured_shuffled_seed42.jsonl
+
+python scripts/extract_on_policy_repairs.py `
+  --results artifacts/humanevalfix_atomized_mixed_structured_k3.jsonl `
+  --output data/processed/on_policy/humanevalfix_later_success_sft.jsonl `
+  --summary artifacts/on_policy_later_success_summary.json
+```
+
+需要诚实说明：HumanEvalFix 已在开发中被查看，不是最终盲测；目前只有一个训练 seed、模型规模和混合比例，反馈置乱也只有 5 个排列；混合时同时加入模型错误并减少合成运行时错误，尚不能拆分两者各自贡献。若继续，应扩大候选采样获得足量 on-policy 轨迹，并在从未用于开发的新修复集上验证。
 
 ## 数据、模型与方法来源
 

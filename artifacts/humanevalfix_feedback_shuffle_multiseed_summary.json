@@ -1,0 +1,81 @@
+{
+  "cases": 143,
+  "correct_feedback": {
+    "successes": 71,
+    "repair_at_1": 0.4965034965034965
+  },
+  "shuffle_seeds": [
+    42,
+    43,
+    44,
+    45,
+    46
+  ],
+  "shuffled_feedback": {
+    "runs": {
+      "42": {
+        "successes": 64,
+        "repair_at_1": 0.44755244755244755,
+        "delta_from_correct_pp": -4.895104895104896,
+        "correct_only": 12,
+        "shuffled_only": 5,
+        "exact_mcnemar_p": 0.143463134765625,
+        "fixed_points": 0,
+        "unique_sources": 143,
+        "mapping_sha256": "0cd6daee4c62247a95e1e8860d7010e6b7047e5ddabc7c50aed2521377ed842f"
+      },
+      "43": {
+        "successes": 69,
+        "repair_at_1": 0.4825174825174825,
+        "delta_from_correct_pp": -1.3986013986014012,
+        "correct_only": 12,
+        "shuffled_only": 10,
+        "exact_mcnemar_p": 0.8318119049072266,
+        "fixed_points": 0,
+        "unique_sources": 143,
+        "mapping_sha256": "38569903b55c0f6880f8eaa41530caf6fb3a70b517b1d76b73b9ec2a21d4a045"
+      },
+      "44": {
+        "successes": 59,
+        "repair_at_1": 0.4125874125874126,
+        "delta_from_correct_pp": -8.39160839160839,
+        "correct_only": 17,
+        "shuffled_only": 5,
+        "exact_mcnemar_p": 0.01690053939819336,
+        "fixed_points": 0,
+        "unique_sources": 143,
+        "mapping_sha256": "4bb411e8b6eb42e792b4bf9cf6a7ccfc6827cb0eb27a6cd2e3304aecf23652ff"
+      },
+      "45": {
+        "successes": 65,
+        "repair_at_1": 0.45454545454545453,
+        "delta_from_correct_pp": -4.1958041958041985,
+        "correct_only": 10,
+        "shuffled_only": 4,
+        "exact_mcnemar_p": 0.1795654296875,
+        "fixed_points": 0,
+        "unique_sources": 143,
+        "mapping_sha256": "a197e5b1da9c4bd6e168f9755e6655d44cb574bebeb0421a0bacdc898e44673c"
+      },
+      "46": {
+        "successes": 65,
+        "repair_at_1": 0.45454545454545453,
+        "delta_from_correct_pp": -4.1958041958041985,
+        "correct_only": 13,
+        "shuffled_only": 7,
+        "exact_mcnemar_p": 0.26317596435546875,
+        "fixed_points": 0,
+        "unique_sources": 143,
+        "mapping_sha256": "307247d99935f60e219eadafb1d152efcf51caefecfd973b428f38b6eade0003"
+      }
+    },
+    "mean_successes": 64.4,
+    "mean_repair_at_1": 0.4503496503496504,
+    "min_successes": 59,
+    "max_successes": 69,
+    "population_std_successes": 3.2,
+    "all_runs_below_correct": true,
+    "uncorrected_p_below_0_05": 1
+  },
+  "inference": "directional_sensitivity_without_stable_significance; do_not_claim_feedback_improves_over_no_feedback"
+}

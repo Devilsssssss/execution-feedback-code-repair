@@ -19,6 +19,9 @@ artifacts/*
 !artifacts/experiment_report.md
 !artifacts/humanevalfix_atomized_full_comparison.json
 !artifacts/humanevalfix_atomized_k3_feedback_ablation.json
+!artifacts/humanevalfix_feedback_shuffle_multiseed_comparison.json
+!artifacts/humanevalfix_feedback_shuffle_multiseed_summary.json
+!artifacts/on_policy_later_success_summary.json
 !artifacts/train_sft_mixed_controlled_manifest.json
 !artifacts/train_sft_mixed_controlled_quality.md
 

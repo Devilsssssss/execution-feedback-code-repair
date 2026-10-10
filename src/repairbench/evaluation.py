@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from collections.abc import Iterable
+import random
+from collections.abc import Iterable, Mapping
 from dataclasses import dataclass
 from typing import Any
 
@@ -8,7 +9,28 @@ from .executor import CodeExecutor
 from .feedback import FeedbackCondition
 from .models import RepairModel
 from .prompts import build_repair_prompt
-from .schemas import BugCase, RepairTask
+from .schemas import BugCase, ExecutionResult, RepairTask
+
+
+@dataclass(frozen=True)
+class FeedbackOverride:
+    source_bug_id: str
+    execution: ExecutionResult
+
+
+def build_feedback_derangement(
+    executions: Mapping[str, ExecutionResult], seed: int
+) -> dict[str, FeedbackOverride]:
+    """Permute feedback with no fixed points while preserving its marginal distribution."""
+    bug_ids = sorted(executions)
+    if len(bug_ids) < 2:
+        raise ValueError("feedback derangement requires at least two cases")
+    random.Random(seed).shuffle(bug_ids)
+    source_ids = bug_ids[1:] + bug_ids[:1]
+    return {
+        target_id: FeedbackOverride(source_id, executions[source_id])
+        for target_id, source_id in zip(bug_ids, source_ids, strict=True)
+    }
 
 
 @dataclass
@@ -17,6 +39,13 @@ class EvaluationRunner:
     executor: CodeExecutor
     condition: FeedbackCondition
     max_repairs: int = 3
+    feedback_overrides: Mapping[str, FeedbackOverride] | None = None
+
+    def __post_init__(self) -> None:
+        if self.feedback_overrides is not None and self.max_repairs != 1:
+            raise ValueError("permuted-feedback controls currently require max_repairs=1")
+        if self.feedback_overrides is not None and self.condition is FeedbackCondition.NONE:
+            raise ValueError("cannot permute feedback when the feedback condition is none")
 
     def _execute(self, code: str, tests: tuple[str, ...], setup_code: str, stage: str):
         result = self.executor.execute(code, tests, setup_code=setup_code)
@@ -40,7 +69,16 @@ class EvaluationRunner:
             public_before = self._execute(
                 current_code, task.public_tests, task.setup_code, "public_before"
             )
-            prompt = build_repair_prompt(task, current_code, public_before, self.condition)
+            prompt_execution = public_before
+            feedback_source_bug_id = bug.bug_id
+            if self.feedback_overrides is not None:
+                try:
+                    override = self.feedback_overrides[bug.bug_id]
+                except KeyError as exc:
+                    raise ValueError(f"missing feedback override for {bug.bug_id}") from exc
+                prompt_execution = override.execution
+                feedback_source_bug_id = override.source_bug_id
+            prompt = build_repair_prompt(task, current_code, prompt_execution, self.condition)
             repaired_code = self.model.repair(prompt)
             generated_characters += len(repaired_code)
             public_after = self._execute(
@@ -53,6 +91,8 @@ class EvaluationRunner:
                     "candidate_code": repaired_code,
                     "public_before": public_before.to_dict(),
                     "public_after": public_after.to_dict(),
+                    "feedback_source_bug_id": feedback_source_bug_id,
+                    "feedback_execution": prompt_execution.to_dict(),
                 }
             )
             current_code = repaired_code
@@ -73,6 +113,7 @@ class EvaluationRunner:
             "bug_id": bug.bug_id,
             "bug_type": bug.bug_type,
             "condition": self.condition.value,
+            "feedback_permuted": self.feedback_overrides is not None,
             "repair_at_1": first_repair_success and final_hidden.all_passed,
             "repair_at_k": repair_success,
             "repairs_used": len(trajectory),

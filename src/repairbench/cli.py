@@ -5,7 +5,7 @@ import json
 from pathlib import Path
 from typing import Any
 
-from .evaluation import EvaluationRunner, summarize
+from .evaluation import EvaluationRunner, build_feedback_derangement, summarize
 from .executor import BubblewrapExecutor, DockerExecutor, LocalSubprocessExecutor
 from .feedback import FeedbackCondition
 from .io import check_task_disjointness, index_tasks, load_bugs, load_tasks, write_jsonl
@@ -145,11 +145,29 @@ def _run_evaluation(
             raise ValueError("--limit must be positive")
         bugs = bugs[: args.limit]
     executor = _executor(args)
+    permutation_seed = getattr(args, "shuffle_feedback_seed", None)
+    feedback_overrides = None
+    if permutation_seed is not None:
+        if args.max_repairs != 1:
+            raise ValueError("--shuffle-feedback-seed requires --max-repairs 1")
+        if args.condition == FeedbackCondition.NONE.value:
+            raise ValueError("--shuffle-feedback-seed requires raw or structured feedback")
+        initial_executions = {}
+        for bug in bugs:
+            task = tasks.get(bug.task_id)
+            if task is None:
+                raise ValueError(f"bug {bug.bug_id} references unknown task {bug.task_id}")
+            execution = executor.execute(bug.buggy_code, task.public_tests, task.setup_code)
+            if execution.status == "runner_error":
+                raise RuntimeError(f"failed to collect initial feedback for {bug.bug_id}")
+            initial_executions[bug.bug_id] = execution
+        feedback_overrides = build_feedback_derangement(initial_executions, permutation_seed)
     runner = EvaluationRunner(
         model=model,
         executor=executor,
         condition=FeedbackCondition(args.condition),
         max_repairs=args.max_repairs,
+        feedback_overrides=feedback_overrides,
     )
     records = []
     for bug in bugs:
@@ -158,6 +176,7 @@ def _run_evaluation(
             raise ValueError(f"bug {bug.bug_id} references unknown task {bug.task_id}")
         record = runner.evaluate_case(task, bug)
         record["run_name"] = run_name
+        record["feedback_permutation_seed"] = permutation_seed
         records.append(record)
         print(
             json.dumps(
@@ -172,6 +191,7 @@ def _run_evaluation(
     summary = summarize(records)
     summary["run_name"] = run_name
     summary["condition"] = args.condition
+    summary["feedback_permutation_seed"] = permutation_seed
     summary_path = Path(args.output).with_suffix(".summary.json")
     summary_path.write_text(json.dumps(summary, indent=2), encoding="utf-8")
     print(json.dumps(summary, indent=2))
@@ -240,6 +260,11 @@ def build_parser() -> argparse.ArgumentParser:
         help="evaluate only the first N bug cases (useful for a CPU smoke test)",
     )
     evaluate.add_argument("--device-map", default="auto")
+    evaluate.add_argument(
+        "--shuffle-feedback-seed",
+        type=int,
+        help="replace each case's feedback with another case's feedback using a fixed derangement",
+    )
     _add_executor_arguments(evaluate)
     evaluate.set_defaults(func=command_evaluate)
 
