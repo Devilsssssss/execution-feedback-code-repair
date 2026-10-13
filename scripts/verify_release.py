@@ -114,7 +114,7 @@ def main() -> int:
             "64.4/143",
             "59–69",
         ),
-        "PROJECT_INTERVIEW_GUIDE.md": (
+        "PROJECT_GUIDE.md": (
             "469",
             "772",
             "1241",
