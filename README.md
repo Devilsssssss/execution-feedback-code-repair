@@ -395,6 +395,21 @@ repairbench evaluate `
 
 混合集固定为 1241 条：保留 469 条模型错误，并从原 AST 变异数据中按 `boundary_condition=122`、`logic_error=267`、`runtime_error=383` 抽样 772 条。使用固定随机种子 42、相同的 3 epoch QLoRA 配置重新训练，未继续训练旧适配器。实际对话模板编码后的最长样本为 1534 tokens，低于训练上限 1536。构建、哈希和审计记录见 `artifacts/train_sft_mixed_controlled_manifest.json` 与 `artifacts/train_sft_mixed_controlled_quality.md`。
 
+### 受控分布对照的边界
+
+为了检验“混合数据收益是否只是错误类型分布变化”，我新增了一个只做数据审计的配额协议：把 Mixed 中的 `model_logic_error`/`model_runtime_error`/`model_timeout_error` 归一化为三类 AST 错误，再检查 AST-only 池能否复现相同配额。结果是 Mixed 的目标配额为 `boundary=122`、`logic=564`、`runtime=555`，而现有去重 AST 池只有 `122/267/852`，逻辑错误缺少 `297` 条，因此**严格同分布对照不可行**。审计报告固定记录输入文件哈希：`artifacts/ast_control_audit_v1.summary.json`。
+
+脚本默认只报告可行性；`--mode exact` 在配额不足时返回非零并明确阻止训练，避免静默重复样本。`--mode maximal` 会生成按最短类别比例缩小的 586 条探索集（`57/267/262`），输出文件在本地 `data/processed/mbpp/` 下，报告为 `artifacts/ast_control_maximal_v1.summary.json`。该探索集只能用于诊断，不能替代 1241 条 Mixed 的正式结论，也不能把它称为完整的公平反事实。
+
+```powershell
+python scripts/audit_ast_control.py `
+  --mixed-sft data/processed/mbpp/train_sft_mixed_controlled.jsonl `
+  --ast-sft data/processed/mbpp/train_sft_v2_dedup.jsonl `
+  --ast-bugs data/processed/mbpp/train_bugs_v2_dedup.jsonl `
+  --output-summary artifacts/ast_control_audit_v1.summary.json `
+  --mode report
+```
+
 ### 结果
 
 所有评测均使用同一批错误案例、单轮 greedy 修复、最多 256 个新 token，并在 Bubblewrap 隔离环境执行。HumanEvalFix 的公开 `check()` 已拆成独立断言，143 个审计案例中有 130 个能提供 expected/actual，隐藏测试不进入提示词。

@@ -24,6 +24,8 @@ artifacts/*
 !artifacts/on_policy_later_success_summary.json
 !artifacts/train_sft_mixed_controlled_manifest.json
 !artifacts/train_sft_mixed_controlled_quality.md
+!artifacts/ast_control_audit_v1.summary.json
+!artifacts/ast_control_maximal_v1.summary.json
 
 outputs/
 models/

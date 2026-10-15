@@ -1,0 +1,64 @@
+{
+  "protocol": "mixed-composition-ast-only-v1",
+  "seed": 42,
+  "inputs": {
+    "mixed_sft": {
+      "path": "data/processed/mbpp/train_sft_mixed_controlled.jsonl",
+      "rows": 1241,
+      "sha256": "022b1b49d19f52481eeb22a9b0c172bb4781de26ff8101cb4bf893d8d5ea47c4"
+    },
+    "ast_sft": {
+      "path": "data/processed/mbpp/train_sft_v2_dedup.jsonl",
+      "rows": 1241,
+      "sha256": "91e9ba8746e3016b1c0632f3ae39ec117f6ea4cb1de17b34bc1960973ec8165f"
+    },
+    "ast_bugs": {
+      "path": "data/processed/mbpp/train_bugs_v2_dedup.jsonl",
+      "rows": 1241,
+      "sha256": "3cbfa67c13bb4afb3cfdbc0d1905c14ecf599f8073a796f5bd1e4e1490c8e6f3"
+    }
+  },
+  "target_normalized_counts": {
+    "boundary_condition": 122,
+    "logic_error": 564,
+    "runtime_error": 555
+  },
+  "ast_available_normalized_counts": {
+    "boundary_condition": 122,
+    "logic_error": 267,
+    "runtime_error": 852
+  },
+  "deficits": {
+    "boundary_condition": 0,
+    "logic_error": 297,
+    "runtime_error": 0
+  },
+  "exact_feasible": false,
+  "maximal_proportional_scale": 0.4734042553191489,
+  "maximal_proportional_quotas": {
+    "boundary_condition": 57,
+    "logic_error": 267,
+    "runtime_error": 262
+  },
+  "maximal_proportional_rows": 586,
+  "selection": {
+    "status": "built",
+    "mode": "maximal",
+    "rows": 586,
+    "normalized_counts": {
+      "boundary_condition": 57,
+      "logic_error": 267,
+      "runtime_error": 262
+    },
+    "outputs": {
+      "sft": {
+        "path": "data/processed/mbpp/train_sft_ast_matched_maximal_v1.jsonl",
+        "sha256": "86a486d62e56560c72fe9fe25b0461ac720c8756053a6e3075271a36d2adf864"
+      },
+      "bugs": {
+        "path": "data/processed/mbpp/train_bugs_ast_matched_maximal_v1.jsonl",
+        "sha256": "8267f28f5f8ad0675b617583c726fe3804c566ba3d4a6665e8cc99604f5e201c"
+      }
+    }
+  }
+}
