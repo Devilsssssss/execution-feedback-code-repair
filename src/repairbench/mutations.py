@@ -107,6 +107,88 @@ class _AggregationSwap(_OccurrenceTransformer):
         return node
 
 
+class _ComparisonLogicSwap(_OccurrenceTransformer):
+    """Invert equality and membership predicates without changing boundaries."""
+
+    mapping: ClassVar[dict[type[ast.cmpop], Callable[[], ast.cmpop]]] = {
+        ast.Eq: ast.NotEq,
+        ast.NotEq: ast.Eq,
+        ast.In: ast.NotIn,
+        ast.NotIn: ast.In,
+        ast.Is: ast.IsNot,
+        ast.IsNot: ast.Is,
+    }
+
+    def visit_Compare(self, node: ast.Compare) -> ast.AST:
+        self.generic_visit(node)
+        for index, item in enumerate(node.ops):
+            replacement = self.mapping.get(type(item))
+            if replacement is not None and self.select():
+                node.ops[index] = replacement()
+                return node
+        return node
+
+
+class _ConditionNegate(_OccurrenceTransformer):
+    """Negate an if/while condition, preserving the original expression tree."""
+
+    def visit_If(self, node: ast.If) -> ast.AST:
+        self.generic_visit(node)
+        if self.select():
+            node.test = ast.UnaryOp(op=ast.Not(), operand=node.test)
+        return node
+
+    def visit_While(self, node: ast.While) -> ast.AST:
+        self.generic_visit(node)
+        if self.select():
+            node.test = ast.UnaryOp(op=ast.Not(), operand=node.test)
+        return node
+
+
+class _IfBranchSwap(_OccurrenceTransformer):
+    """Swap the two explicit branches of an if statement."""
+
+    def visit_If(self, node: ast.If) -> ast.AST:
+        self.generic_visit(node)
+        if node.orelse and self.select():
+            node.body, node.orelse = node.orelse, node.body
+        return node
+
+
+class _TernaryBranchSwap(_OccurrenceTransformer):
+    def visit_IfExp(self, node: ast.IfExp) -> ast.AST:
+        self.generic_visit(node)
+        if self.select():
+            node.body, node.orelse = node.orelse, node.body
+        return node
+
+
+class _BooleanOperandDrop(_OccurrenceTransformer):
+    """Remove one operand from a three-or-more operand boolean expression."""
+
+    def visit_BoolOp(self, node: ast.BoolOp) -> ast.AST:
+        self.generic_visit(node)
+        if len(node.values) >= 3 and self.select():
+            node.values.pop()
+        return node
+
+
+class _LoopElseSwap(_OccurrenceTransformer):
+    """Swap loop body and else clauses when both are present."""
+
+    def visit_For(self, node: ast.For) -> ast.AST:
+        self.generic_visit(node)
+        if node.orelse and self.select():
+            node.body, node.orelse = node.orelse, node.body
+        return node
+
+    def visit_While(self, node: ast.While) -> ast.AST:
+        self.generic_visit(node)
+        if node.orelse and self.select():
+            node.body, node.orelse = node.orelse, node.body
+        return node
+
+
 class _RuntimeNameError(_OccurrenceTransformer):
     protected: ClassVar[set[str]] = {
         "range",
@@ -143,6 +225,12 @@ MUTATORS: tuple[tuple[str, str, type[_OccurrenceTransformer]], ...] = (
     ("arithmetic_swap", "logic_error", _ArithmeticSwap),
     ("boolean_swap", "logic_error", _BooleanSwap),
     ("aggregation_swap", "logic_error", _AggregationSwap),
+    ("comparison_logic_swap", "logic_error", _ComparisonLogicSwap),
+    ("condition_negate", "logic_error", _ConditionNegate),
+    ("if_branch_swap", "logic_error", _IfBranchSwap),
+    ("ternary_branch_swap", "logic_error", _TernaryBranchSwap),
+    ("boolean_operand_drop", "logic_error", _BooleanOperandDrop),
+    ("loop_else_swap", "logic_error", _LoopElseSwap),
     ("runtime_name_error", "runtime_error", _RuntimeNameError),
 )
 

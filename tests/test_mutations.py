@@ -39,3 +39,80 @@ def test_constant_boundary_mutation_shifts_numeric_threshold() -> None:
 
     assert mutation.bug_type == "boundary_condition"
     assert "value < 11" in mutation.code
+
+
+def test_comparison_logic_swap_inverts_equality() -> None:
+    code = """def is_same(left, right):
+    return left == right
+"""
+    mutation = next(
+        item for item in generate_mutations(code) if item.name == "comparison_logic_swap"
+    )
+
+    assert mutation.bug_type == "logic_error"
+    assert "left != right" in mutation.code
+
+
+def test_condition_negate_wraps_if_test() -> None:
+    code = """def sign(value):
+    if value >= 0:
+        return 1
+    return -1
+"""
+    mutation = next(
+        item for item in generate_mutations(code) if item.name == "condition_negate"
+    )
+
+    assert mutation.bug_type == "logic_error"
+    assert "not value >= 0" in mutation.code
+
+
+def test_if_branch_swap_exchanges_branches() -> None:
+    code = """def classify(value):
+    if value > 0:
+        return "positive"
+    else:
+        return "non-positive"
+"""
+    mutation = next(
+        item for item in generate_mutations(code) if item.name == "if_branch_swap"
+    )
+
+    assert mutation.bug_type == "logic_error"
+    assert mutation.code.index("non-positive") < mutation.code.index("positive\\"")
+
+
+def test_ternary_branch_swap_exchanges_branches() -> None:
+    code = 'value = 1\nlabel = "even" if value % 2 == 0 else "odd"\n'
+    mutation = next(
+        item for item in generate_mutations(code) if item.name == "ternary_branch_swap"
+    )
+
+    assert mutation.code.startswith('label = "odd"')
+
+
+def test_boolean_operand_drop_removes_last_operand() -> None:
+    code = """def check(value):
+    return value > 0 and value < 10 and value % 2 == 0
+"""
+    mutation = next(
+        item for item in generate_mutations(code) if item.name == "boolean_operand_drop"
+    )
+
+    assert "% 2" not in mutation.code
+
+
+def test_loop_else_swap_exchanges_clauses() -> None:
+    code = """def first_even(values):
+    for value in values:
+        if value % 2 == 0:
+            return value
+    else:
+        return -1
+"""
+    mutation = next(
+        item for item in generate_mutations(code) if item.name == "loop_else_swap"
+    )
+
+    assert mutation.bug_type == "logic_error"
+    assert mutation.code.index("return -1") < mutation.code.index("return value")
