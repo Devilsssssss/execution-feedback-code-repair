@@ -1,0 +1,152 @@
+{
+  "status": "completed-remote-training-and-evaluation",
+  "protocol": "mixed-composition-ast-only-v1",
+  "seed": 42,
+  "rows": 1241,
+  "normalized_counts": {
+    "boundary_condition": 122,
+    "logic_error": 564,
+    "runtime_error": 555
+  },
+  "train_file": {
+    "path": "data/processed/mbpp/train_sft_ast_matched_v3.jsonl",
+    "sha256": "0982f485b55f611944eaa36bdfc4545661755159607a0dced2cc7a0d2eb2d935"
+  },
+  "bug_file": {
+    "path": "data/processed/mbpp/train_bugs_ast_matched_v3.jsonl",
+    "sha256": "7b60e05fd93e40f7647add1efc90be10906ef4a2a2f3499a8fc9371f4cbc0b78"
+  },
+  "source_control_report": "artifacts/ast_control_supplemented_v3.report.json",
+  "supplement_docker_audit_report": "artifacts/ast_logic_supplement_v1.docker_audit.summary.json",
+  "data_quality_report": "artifacts/train_sft_ast_matched_v3_quality.json",
+  "tokenizer_quality_report": "artifacts/train_sft_ast_matched_v3_quality_tokenizer.json",
+  "tokenizer_audit": {
+    "tokenizer": "models/qwen2.5-coder-0.5b-instruct",
+    "max_training_chat_tokens": 1525,
+    "max_length": 1536,
+    "within_limit": true,
+    "mixed_control_max_training_chat_tokens": 1534
+  },
+  "training": {
+    "model_id": "models/qwen2.5-coder-0.5b-instruct",
+    "epochs": 3,
+    "learning_rate": 0.0002,
+    "batch_size": 1,
+    "gradient_accumulation": 16,
+    "max_length": 1536,
+    "load_in_4bit": true,
+    "gradient_checkpointing": true,
+    "device_map": "auto",
+    "lora_r": 16,
+    "lora_alpha": 32,
+    "lora_dropout": 0.05,
+    "target_modules": ["q_proj", "k_proj", "v_proj", "o_proj"]
+  },
+  "remote_runs": [
+    {
+      "seed": 42,
+      "output_dir": "outputs/qwen25-coder-05b-repair-qlora-ast-matched-v3",
+      "required": true
+    },
+    {
+      "seed": 43,
+      "output_dir": "outputs/qwen25-coder-05b-repair-qlora-mixed-controlled-seed43",
+      "train_file": "data/processed/mbpp/train_sft_mixed_controlled.jsonl",
+      "required": true
+    },
+    {
+      "seed": 44,
+      "output_dir": "outputs/qwen25-coder-05b-repair-qlora-mixed-controlled-seed44",
+      "train_file": "data/processed/mbpp/train_sft_mixed_controlled.jsonl",
+      "required": true
+    }
+  ],
+  "remote_environment": {
+    "host": "10.199.161.82",
+    "python": "/data/qianketong/anaconda3/bin/python",
+    "python_version": "3.12.7",
+    "torch_version": "2.5.1",
+    "gpu": "2 x NVIDIA RTX 3090",
+    "executor": "bwrap"
+  },
+  "remote_training_results": [
+    {
+      "label": "ast_seed42",
+      "output_dir": "outputs/qwen25-coder-05b-repair-qlora-ast-matched-v3",
+      "status": "completed",
+      "train_steps": 234,
+      "runtime_seconds": 1297.76,
+      "final_train_loss": 0.14302371162125188
+    },
+    {
+      "label": "mixed_seed43",
+      "output_dir": "outputs/qwen25-coder-05b-repair-qlora-mixed-controlled-seed43",
+      "status": "completed",
+      "train_steps": 234,
+      "runtime_seconds": 1292.21,
+      "final_train_loss": 0.31441389062465763
+    },
+    {
+      "label": "mixed_seed44",
+      "output_dir": "outputs/qwen25-coder-05b-repair-qlora-mixed-controlled-seed44",
+      "status": "completed",
+      "train_steps": 234,
+      "runtime_seconds": 1356.23,
+      "final_train_loss": 0.31226058571766585
+    }
+  ],
+  "remote_evaluation_results": {
+    "formal_summary_dir": "artifacts/",
+    "ast_seed42": {
+      "none": "artifacts/humanevalfix_ast_matched_v3_seed42_none.summary.json",
+      "structured": "artifacts/humanevalfix_ast_matched_v3_seed42_structured.summary.json"
+    },
+    "mixed_seed43": {
+      "none": "artifacts/humanevalfix_mixed_controlled_seed43_none.summary.json",
+      "structured": "artifacts/humanevalfix_mixed_controlled_seed43_structured.summary.json"
+    },
+    "mixed_seed44": {
+      "none": "artifacts/humanevalfix_mixed_controlled_seed44_none.summary.json",
+      "structured": "artifacts/humanevalfix_mixed_controlled_seed44_structured.summary.json"
+    },
+    "cases": 143,
+    "max_repairs": 1,
+    "max_new_tokens": 256
+  },
+  "confirmation_results": {
+    "cases": 36,
+    "status": "completed-retrospective-freeze",
+    "report": "artifacts/controlled_experiment_results_20261018.md"
+  },
+  "paired_analysis": {
+    "none": "artifacts/controlled_experiment_none_paired_20261018.json",
+    "structured": "artifacts/controlled_experiment_structured_paired_20261018.json",
+    "old_seed42_diagnostic": {
+      "none": "artifacts/controlled_experiment_mixed_seed42_43_44_none_paired_20261018.json",
+      "structured": "artifacts/controlled_experiment_mixed_seed42_43_44_structured_paired_20261018.json"
+    }
+  },
+  "commands": {
+    "ast_seed42": "python scripts/train_sft.py --train-file data/processed/mbpp/train_sft_ast_matched_v3.jsonl --model-id models/qwen2.5-coder-0.5b-instruct --output-dir outputs/qwen25-coder-05b-repair-qlora-ast-matched-v3 --load-in-4bit --gradient-checkpointing --max-length 1536 --epochs 3 --batch-size 1 --gradient-accumulation 16 --device-map auto --seed 42",
+    "mixed_seed43": "python scripts/train_sft.py --train-file data/processed/mbpp/train_sft_mixed_controlled.jsonl --model-id models/qwen2.5-coder-0.5b-instruct --output-dir outputs/qwen25-coder-05b-repair-qlora-mixed-controlled-seed43 --load-in-4bit --gradient-checkpointing --max-length 1536 --epochs 3 --batch-size 1 --gradient-accumulation 16 --device-map auto --seed 43",
+    "mixed_seed44": "python scripts/train_sft.py --train-file data/processed/mbpp/train_sft_mixed_controlled.jsonl --model-id models/qwen2.5-coder-0.5b-instruct --output-dir outputs/qwen25-coder-05b-repair-qlora-mixed-controlled-seed44 --load-in-4bit --gradient-checkpointing --max-length 1536 --epochs 3 --batch-size 1 --gradient-accumulation 16 --device-map auto --seed 44",
+    "evaluate_template": "repairbench evaluate --tasks data/processed/humanevalfix_atomized/audited_tasks.jsonl --bugs data/processed/humanevalfix_atomized/audited_bugs.jsonl --model-id models/qwen2.5-coder-0.5b-instruct --adapter-id <ADAPTER_DIR> --condition <none|structured> --max-repairs 1 --max-new-tokens 256 --executor bwrap --output <OUTPUT_JSONL>"
+  },
+  "evaluation": {
+    "tasks": "data/processed/humanevalfix_atomized/audited_tasks.jsonl",
+    "bugs": "data/processed/humanevalfix_atomized/audited_bugs.jsonl",
+    "conditions": ["none", "structured"],
+    "max_repairs": 1,
+    "max_new_tokens": 256,
+    "executor": "bwrap",
+    "confirmation_tasks": "data/processed/humanevalfix_atomized/confirmation_v1/tasks.jsonl",
+    "confirmation_bugs": "data/processed/humanevalfix_atomized/confirmation_v1/bugs.jsonl",
+    "confirmation_summary": "artifacts/humanevalfix_confirmation_v1.summary.json",
+    "confirmation_controls": {
+      "noop_structured": "artifacts/humanevalfix_confirmation_v1_noop.summary.json",
+      "heuristic_structured": "artifacts/humanevalfix_confirmation_v1_heuristic.summary.json",
+      "expected_repair_at_1": 0.0
+    }
+  },
+  "local_blocker_before_remote_run": "QLoRA and model evaluation require CUDA PyTorch, model weights, and a sandbox executor; this workstation has no usable CUDA runtime."
+}

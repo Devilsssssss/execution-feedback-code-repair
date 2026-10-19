@@ -36,7 +36,7 @@ def main() -> int:
         allow_agent=False,
         look_for_keys=False,
     )
-    stdin, stdout, stderr = client.exec_command(command, timeout=timeout)
+    _stdin, stdout, stderr = client.exec_command(command, timeout=timeout)
     out = stdout.read().decode(errors="replace")
     err = stderr.read().decode(errors="replace")
     code = stdout.channel.recv_exit_status()

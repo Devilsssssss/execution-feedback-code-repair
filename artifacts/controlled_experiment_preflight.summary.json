@@ -1,0 +1,69 @@
+{
+  "status": "pass",
+  "manifest": "F:\\\u627e\u5b9e\u4e60\\execution-feedback-code-repair\\artifacts\\train_sft_ast_matched_v3_manifest.json",
+  "checks": {
+    "ast_exact_data": {
+      "status": "pass",
+      "details": {
+        "rows": 1241,
+        "bug_rows": 1241,
+        "counts": {
+          "boundary_condition": 122,
+          "logic_error": 564,
+          "runtime_error": 555
+        },
+        "train_sha256": "0982f485b55f611944eaa36bdfc4545661755159607a0dced2cc7a0d2eb2d935",
+        "bug_sha256": "7b60e05fd93e40f7647add1efc90be10906ef4a2a2f3499a8fc9371f4cbc0b78"
+      }
+    },
+    "docker_audit": {
+      "status": "pass",
+      "details": {
+        "status": "pass",
+        "reference_passes": 342,
+        "reference_checks": 342,
+        "bug_passes": 297,
+        "bug_checks": 297
+      }
+    },
+    "tokenizer_length": {
+      "status": "pass",
+      "details": {
+        "max_training_chat_tokens": 1525,
+        "max_length": 1536
+      }
+    },
+    "confirmation_freeze": {
+      "status": "pass",
+      "details": {
+        "status": "frozen-for-future-confirmation",
+        "tasks": 36,
+        "bugs": 36,
+        "blind_status": "not_blind_retrospective_freeze: the 143-task source was already used in development analyses; this subset is blind only from this freeze onward"
+      }
+    },
+    "confirmation_controls": {
+      "status": "pass",
+      "details": {
+        "noop_structured": {
+          "cases": 36,
+          "repair_at_1": 0.0
+        },
+        "heuristic_structured": {
+          "cases": 36,
+          "repair_at_1": 0.0
+        }
+      }
+    },
+    "mixed_tokenizer_length": {
+      "status": "pass",
+      "details": {
+        "max_training_chat_tokens": 1534,
+        "max_length": 1536
+      }
+    }
+  },
+  "failed_checks": [],
+  "training_status": "ready-for-remote-training",
+  "model_training_performed": false
+}

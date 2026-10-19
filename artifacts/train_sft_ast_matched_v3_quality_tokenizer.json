@@ -1,0 +1,428 @@
+{
+  "decision": "warn",
+  "inputs": {
+    "train_tasks": 342,
+    "validation_tasks": 43,
+    "test_tasks": 42,
+    "train_bugs": 1241,
+    "train_sft": 1241
+  },
+  "checks": {
+    "task_integrity": {
+      "status": "warn",
+      "details": {
+        "by_split": {
+          "train": {
+            "tasks": 342,
+            "duplicate_test_tasks": [],
+            "public_hidden_overlap_tasks": [],
+            "unparseable_reference_tasks": [],
+            "reference_parse_warning_tasks": [
+              "mbpp_305",
+              "mbpp_454",
+              "mbpp_593"
+            ],
+            "missing_entry_point_tasks": [],
+            "public_tests": {
+              "count": 342,
+              "min": 2,
+              "mean": 2.02,
+              "p50": 2,
+              "p95": 2,
+              "p99": 3,
+              "max": 4
+            },
+            "hidden_tests": {
+              "count": 342,
+              "min": 1,
+              "mean": 1.0,
+              "p50": 1,
+              "p95": 1,
+              "p99": 1,
+              "max": 2
+            },
+            "reference_chars": {
+              "count": 342,
+              "min": 36,
+              "mean": 153.03,
+              "p50": 121,
+              "p95": 360,
+              "p99": 589,
+              "max": 903
+            }
+          },
+          "validation": {
+            "tasks": 43,
+            "duplicate_test_tasks": [],
+            "public_hidden_overlap_tasks": [],
+            "unparseable_reference_tasks": [],
+            "reference_parse_warning_tasks": [],
+            "missing_entry_point_tasks": [],
+            "public_tests": {
+              "count": 43,
+              "min": 2,
+              "mean": 2.37,
+              "p50": 2,
+              "p95": 4,
+              "p99": 4,
+              "max": 4
+            },
+            "hidden_tests": {
+              "count": 43,
+              "min": 1,
+              "mean": 1.02,
+              "p50": 1,
+              "p95": 1,
+              "p99": 2,
+              "max": 2
+            },
+            "reference_chars": {
+              "count": 43,
+              "min": 64,
+              "mean": 149.63,
+              "p50": 111,
+              "p95": 425,
+              "p99": 470,
+              "max": 470
+            }
+          },
+          "test": {
+            "tasks": 42,
+            "duplicate_test_tasks": [
+              "mbpp_799"
+            ],
+            "public_hidden_overlap_tasks": [],
+            "unparseable_reference_tasks": [],
+            "reference_parse_warning_tasks": [],
+            "missing_entry_point_tasks": [],
+            "public_tests": {
+              "count": 42,
+              "min": 2,
+              "mean": 2.36,
+              "p50": 2,
+              "p95": 4,
+              "p99": 5,
+              "max": 5
+            },
+            "hidden_tests": {
+              "count": 42,
+              "min": 1,
+              "mean": 1.05,
+              "p50": 1,
+              "p95": 1,
+              "p99": 2,
+              "max": 2
+            },
+            "reference_chars": {
+              "count": 42,
+              "min": 52,
+              "mean": 157.64,
+              "p50": 132,
+              "p95": 407,
+              "p99": 500,
+              "max": 500
+            }
+          }
+        },
+        "issues": {
+          "train": {
+            "reference_parse_warning_tasks": [
+              "mbpp_305",
+              "mbpp_454",
+              "mbpp_593"
+            ]
+          },
+          "validation": {},
+          "test": {
+            "duplicate_test_tasks": [
+              "mbpp_799"
+            ]
+          }
+        }
+      }
+    },
+    "bug_integrity": {
+      "status": "pass",
+      "details": {
+        "bugs": 1241,
+        "bug_types": {
+          "boundary_condition": 122,
+          "logic_error": 564,
+          "runtime_error": 555
+        },
+        "tasks_with_bugs": 338,
+        "bugs_per_task": {
+          "count": 338,
+          "min": 1,
+          "mean": 3.67,
+          "p50": 3,
+          "p95": 7,
+          "p99": 12,
+          "max": 16
+        },
+        "missing_task_bugs": [],
+        "unparseable_bug_bugs": [],
+        "missing_entry_point_bugs": [],
+        "unchanged_bugs": [],
+        "invalid_public_feedback_bugs": [],
+        "duplicate_buggy_code_groups": []
+      }
+    },
+    "sft_integrity": {
+      "status": "pass",
+      "details": {
+        "rows": 1241,
+        "missing_or_empty_fields": [],
+        "unknown_bug_or_task_rows": [],
+        "duplicate_bug_rows": [],
+        "completion_mismatch_bugs": [],
+        "prompt_mismatch_bugs": [],
+        "bugs_without_sft_rows": [],
+        "prompt_chars": {
+          "count": 1241,
+          "min": 507,
+          "mean": 870.43,
+          "p50": 820,
+          "p95": 1229,
+          "p99": 1418,
+          "max": 4633
+        },
+        "completion_chars": {
+          "count": 1241,
+          "min": 37,
+          "mean": 184.51,
+          "p50": 154,
+          "p95": 417,
+          "p99": 639,
+          "max": 904
+        },
+        "approx_prompt_tokens": {
+          "count": 1241,
+          "min": 127,
+          "mean": 217.99,
+          "p50": 205,
+          "p95": 308,
+          "p99": 355,
+          "max": 1159
+        },
+        "approx_completion_tokens": {
+          "count": 1241,
+          "min": 10,
+          "mean": 46.5,
+          "p50": 39,
+          "p95": 105,
+          "p99": 160,
+          "max": 226
+        }
+      }
+    },
+    "split_leakage": {
+      "status": "pass",
+      "details": {
+        "task_id_overlap_groups": [],
+        "duplicate_prompt_solution_groups": []
+      }
+    }
+  },
+  "task_groups": {
+    "train": {
+      "tasks": 342,
+      "duplicate_test_tasks": [],
+      "public_hidden_overlap_tasks": [],
+      "unparseable_reference_tasks": [],
+      "reference_parse_warning_tasks": [
+        "mbpp_305",
+        "mbpp_454",
+        "mbpp_593"
+      ],
+      "missing_entry_point_tasks": [],
+      "public_tests": {
+        "count": 342,
+        "min": 2,
+        "mean": 2.02,
+        "p50": 2,
+        "p95": 2,
+        "p99": 3,
+        "max": 4
+      },
+      "hidden_tests": {
+        "count": 342,
+        "min": 1,
+        "mean": 1.0,
+        "p50": 1,
+        "p95": 1,
+        "p99": 1,
+        "max": 2
+      },
+      "reference_chars": {
+        "count": 342,
+        "min": 36,
+        "mean": 153.03,
+        "p50": 121,
+        "p95": 360,
+        "p99": 589,
+        "max": 903
+      }
+    },
+    "validation": {
+      "tasks": 43,
+      "duplicate_test_tasks": [],
+      "public_hidden_overlap_tasks": [],
+      "unparseable_reference_tasks": [],
+      "reference_parse_warning_tasks": [],
+      "missing_entry_point_tasks": [],
+      "public_tests": {
+        "count": 43,
+        "min": 2,
+        "mean": 2.37,
+        "p50": 2,
+        "p95": 4,
+        "p99": 4,
+        "max": 4
+      },
+      "hidden_tests": {
+        "count": 43,
+        "min": 1,
+        "mean": 1.02,
+        "p50": 1,
+        "p95": 1,
+        "p99": 2,
+        "max": 2
+      },
+      "reference_chars": {
+        "count": 43,
+        "min": 64,
+        "mean": 149.63,
+        "p50": 111,
+        "p95": 425,
+        "p99": 470,
+        "max": 470
+      }
+    },
+    "test": {
+      "tasks": 42,
+      "duplicate_test_tasks": [
+        "mbpp_799"
+      ],
+      "public_hidden_overlap_tasks": [],
+      "unparseable_reference_tasks": [],
+      "reference_parse_warning_tasks": [],
+      "missing_entry_point_tasks": [],
+      "public_tests": {
+        "count": 42,
+        "min": 2,
+        "mean": 2.36,
+        "p50": 2,
+        "p95": 4,
+        "p99": 5,
+        "max": 5
+      },
+      "hidden_tests": {
+        "count": 42,
+        "min": 1,
+        "mean": 1.05,
+        "p50": 1,
+        "p95": 1,
+        "p99": 2,
+        "max": 2
+      },
+      "reference_chars": {
+        "count": 42,
+        "min": 52,
+        "mean": 157.64,
+        "p50": 132,
+        "p95": 407,
+        "p99": 500,
+        "max": 500
+      }
+    }
+  },
+  "bug_distribution": {
+    "boundary_condition": 122,
+    "logic_error": 564,
+    "runtime_error": 555
+  },
+  "sft_lengths": {
+    "prompt_chars": {
+      "count": 1241,
+      "min": 507,
+      "mean": 870.43,
+      "p50": 820,
+      "p95": 1229,
+      "p99": 1418,
+      "max": 4633
+    },
+    "completion_chars": {
+      "count": 1241,
+      "min": 37,
+      "mean": 184.51,
+      "p50": 154,
+      "p95": 417,
+      "p99": 639,
+      "max": 904
+    },
+    "approx_prompt_tokens": {
+      "count": 1241,
+      "min": 127,
+      "mean": 217.99,
+      "p50": 205,
+      "p95": 308,
+      "p99": 355,
+      "max": 1159
+    },
+    "approx_completion_tokens": {
+      "count": 1241,
+      "min": 10,
+      "mean": 46.5,
+      "p50": 39,
+      "p95": 105,
+      "p99": 160,
+      "max": 226
+    },
+    "tokenizer": {
+      "prompt_tokens": {
+        "count": 1241,
+        "min": 126,
+        "mean": 257.21,
+        "p50": 238,
+        "p95": 410,
+        "p99": 528,
+        "max": 1419
+      },
+      "completion_tokens": {
+        "count": 1241,
+        "min": 10,
+        "mean": 61.38,
+        "p50": 48,
+        "p95": 169,
+        "p99": 210,
+        "max": 210
+      },
+      "combined_tokens": {
+        "count": 1241,
+        "min": 151,
+        "mean": 318.58,
+        "p50": 290,
+        "p95": 566,
+        "p99": 647,
+        "max": 1473
+      },
+      "training_chat_tokens": {
+        "count": 1241,
+        "min": 203,
+        "mean": 370.58,
+        "p50": 342,
+        "p95": 618,
+        "p99": 699,
+        "max": 1525
+      },
+      "tokenizer": "models/qwen2.5-coder-0.5b-instruct"
+    }
+  },
+  "recommendations": [
+    "训练前保留 train_audited_tasks.jsonl 的参考答案审计结果；不要把 rejected 文件混入 SFT。",
+    "若 prompt/completion mismatch 或 public feedback 无效，先修复数据生成流程再训练。",
+    "正式实验固定任务级 train/validation/test 划分，并报告同题不同错误版本只能出现在一个 split。",
+    "当前 train SFT 样本只有运行时错误和少量逻辑/边界错误时，应做按 bug_type 的分层统计，避免只学会 NameError 修复。"
+  ]
+}

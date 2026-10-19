@@ -1,0 +1,42 @@
+{
+  "cases": 143,
+  "repair_at_1": 0.38461538461538464,
+  "repair_at_k": 0.38461538461538464,
+  "mean_repairs_used": 1.0,
+  "mean_generated_characters": 209.979020979021,
+  "by_bug_type": {
+    "excess_logic": {
+      "cases": 25,
+      "repair_at_1": 0.2,
+      "repair_at_k": 0.2
+    },
+    "function_misuse": {
+      "cases": 7,
+      "repair_at_1": 0.14285714285714285,
+      "repair_at_k": 0.14285714285714285
+    },
+    "missing_logic": {
+      "cases": 27,
+      "repair_at_1": 0.18518518518518517,
+      "repair_at_k": 0.18518518518518517
+    },
+    "operator_misuse": {
+      "cases": 24,
+      "repair_at_1": 0.4166666666666667,
+      "repair_at_k": 0.4166666666666667
+    },
+    "value_misuse": {
+      "cases": 39,
+      "repair_at_1": 0.5897435897435898,
+      "repair_at_k": 0.5897435897435898
+    },
+    "variable_misuse": {
+      "cases": 21,
+      "repair_at_1": 0.5238095238095238,
+      "repair_at_k": 0.5238095238095238
+    }
+  },
+  "run_name": "outputs/qwen25-coder-05b-repair-qlora-ast-matched-v3",
+  "condition": "structured",
+  "feedback_permutation_seed": null
+}

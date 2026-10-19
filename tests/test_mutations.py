@@ -1,5 +1,7 @@
+import ast
+
 from repairbench.executor import LocalSubprocessExecutor
-from repairbench.mutations import generate_mutations
+from repairbench.mutations import SUPPLEMENTAL_LOGIC_MUTATOR_NAMES, generate_mutations
 
 
 def test_boundary_mutation_is_valid_and_fails_test() -> None:
@@ -79,7 +81,12 @@ def test_if_branch_swap_exchanges_branches() -> None:
     )
 
     assert mutation.bug_type == "logic_error"
-    assert mutation.code.index("non-positive") < mutation.code.index("positive\\"")
+    function = next(
+        node for node in ast.walk(ast.parse(mutation.code)) if isinstance(node, ast.FunctionDef)
+    )
+    branch = next(node for node in ast.walk(function) if isinstance(node, ast.If))
+    assert ast.literal_eval(branch.body[0].value) == "non-positive"
+    assert ast.literal_eval(branch.orelse[0].value) == "positive"
 
 
 def test_ternary_branch_swap_exchanges_branches() -> None:
@@ -88,7 +95,15 @@ def test_ternary_branch_swap_exchanges_branches() -> None:
         item for item in generate_mutations(code) if item.name == "ternary_branch_swap"
     )
 
-    assert mutation.code.startswith('label = "odd"')
+    assignment = next(
+        node
+        for node in ast.parse(mutation.code).body
+        if isinstance(node, ast.Assign)
+        and any(isinstance(target, ast.Name) and target.id == "label" for target in node.targets)
+    )
+    assert isinstance(assignment.value, ast.IfExp)
+    assert ast.literal_eval(assignment.value.body) == "odd"
+    assert ast.literal_eval(assignment.value.orelse) == "even"
 
 
 def test_boolean_operand_drop_removes_last_operand() -> None:
@@ -116,3 +131,17 @@ def test_loop_else_swap_exchanges_clauses() -> None:
 
     assert mutation.bug_type == "logic_error"
     assert mutation.code.index("return -1") < mutation.code.index("return value")
+
+
+def test_supplemental_logic_mutators_can_be_selected_as_a_pool() -> None:
+    code = """def choose(values, index):
+    total = 0
+    for value in range(index):
+        total += value
+    return values[index] if total else False
+"""
+    mutations = list(generate_mutations(code, include_names=SUPPLEMENTAL_LOGIC_MUTATOR_NAMES))
+
+    assert mutations
+    assert {mutation.bug_type for mutation in mutations} == {"logic_error"}
+    assert {mutation.name for mutation in mutations} <= SUPPLEMENTAL_LOGIC_MUTATOR_NAMES

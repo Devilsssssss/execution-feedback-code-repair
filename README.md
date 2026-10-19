@@ -2,7 +2,7 @@
 
 一个研究执行反馈与小型代码模型修复能力的实验项目：评估模型能否利用公开测试的执行反馈，修复 Python 单函数中的逻辑与运行时错误。
 
-当前版本已经完成数据构建、QLoRA 训练和独立测试集评测：
+历史主实验已经完成数据构建、QLoRA 训练和独立测试集评测；精确 AST-only 反事实对照和 Mixed 多种子复验也已完成。已经完成的基础设施包括：
 
 - 按题目划分训练/评测数据，阻止同题泄漏；
 - 用 AST 进行可追踪的受控错误注入；
@@ -11,7 +11,13 @@
 - 通过 Docker 或 Linux Bubblewrap 隔离执行模型生成的代码；
 - 输出逐样本轨迹和聚合指标，支持按错误类型分析。
 
-最终结论不是“执行反馈一定有效”，而是：**加入经过执行审计的模型真实错误，显著改善了跨数据集修复；当前 SFT 尚未学会稳定利用反馈。** 项目同时保留正结果和负结果，避免只展示最高分。
+当前复现状态需要区分历史结果和 2026-10-18 的受控复验：
+
+- 已完成：297 条新增 AST 逻辑错误、`boundary=122 / logic=564 / runtime=555` 的 1241 条精确 AST-only 对照、Docker 隔离复审、实际 tokenizer 长度审计，以及 AST seed 42、Mixed seed 43/44 的训练与双条件 HumanEvalFix 评测；
+- 已完成：36 例追溯冻结确认集的六个条件评测。它从冻结时起不再用于调参，但不能称为历史盲测；
+- 旧的 50.3%/49.7% 是 Mixed seed 42 的历史单 seed 结果，seed 43/44 没有复现该点估计，精确 AST-only 与新 Mixed 的配对差异也未达显著。
+
+最终结论不是“执行反馈一定有效”。历史 seed42 曾提示加入经过执行审计的模型真实错误可能改善跨数据集修复，但精确 AST-only 与 Mixed seed43/44 的新对照没有给出稳定显著差异；当前 SFT 也尚未证明能稳定利用反馈。项目同时保留历史正结果和最新不确定性，避免只展示最高分。
 
 ## 目录
 
@@ -26,7 +32,7 @@ tests/                  评测可信性与核心流程测试
 
 ## 最终实验结论
 
-2026-10-10 的主结论来自 HumanEvalFix Python 外部评测。所有条件使用相同的 143 个审计案例、greedy decoding、单轮最多 256 个新 token；公开断言可形成反馈，隐藏测试不进入提示词。
+2026-10-10 的主结论是历史单 seed 结果；2026-10-18 已完成同协议的精确 AST-only 和 Mixed 多种子复验。所有条件使用相同的 143 个审计案例、greedy decoding、单轮最多 256 个新 token；公开断言可形成反馈，隐藏测试不进入提示词。
 
 | 训练数据 | 无反馈 | 结构化反馈 |
 |---|---:|---:|
@@ -36,6 +42,16 @@ tests/                  评测可信性与核心流程测试
 等规模混合数据在两种提示条件下都增加 30 个成功案例：无反馈配对 McNemar `p=2.27e-7`，结构化反馈 `p=6.04e-7`。但混合模型的无反馈 72/143 与结构化反馈 71/143 没有显著差异（`p=1.0`）；最多三轮时也只是 77/143 与 75/143（`p=0.804`）。因此证据支持**训练错误分布改进**，不支持“模型已学会有效使用执行反馈”。
 
 后续增加了 5 个反馈置乱对照（seed 42–46）：每次都将 143 条反馈做无自配对的一一置换。正确反馈为 71/143，5 次置乱分别为 64、69、59、65、65/143，均值 64.4/143（45.0%），范围 59–69。虽然 5 次都低于正确反馈，但逐次配对检验只有 1/5 在未校正条件下达到 `p<0.05`，结果对置乱方式较敏感；而且无反馈仍为 72/143。因此它提示反馈内容会影响输出，但仍不能证明反馈带来稳定净收益。
+
+### 2026-10-18 受控复验（已完成）
+
+| 训练 run | seed | 无反馈 | 结构化反馈 |
+|---|---:|---:|---:|
+| 精确 AST-only | 42 | 57/143（39.9%） | 55/143（38.5%） |
+| Mixed | 43 | 61/143（42.7%） | 64/143（44.8%） |
+| Mixed | 44 | 64/143（44.8%） | 65/143（45.5%） |
+
+Mixed seed 43 与 44 彼此的配对 McNemar 检验为无反馈 `p=0.6776`、结构化反馈 `p=1.0`；精确 AST-only 对 Mixed43/44 的 `p` 分别为无反馈 `0.5572/0.2295`、结构化反馈 `0.2110/0.1539`。因此新 run 没有提供“Mixed 稳定显著优于精确 AST-only”的证据，旧 seed42 的 72/143 与 71/143 应保留为历史单 seed 结果。完整表格、36 例确认集和逐例统计见 `artifacts/controlled_experiment_results_20261018.md`。
 
 可直接复核的 Git 内产物：
 
@@ -47,6 +63,15 @@ tests/                  评测可信性与核心流程测试
 - `artifacts/on_policy_later_success_summary.json`：后续成功轨迹的数量与类型汇总；
 - `artifacts/train_sft_mixed_controlled_manifest.json`：1241 条混合数据的来源、数量与哈希；
 - `artifacts/train_sft_mixed_controlled_quality.md`：训练前质量审计。
+- `artifacts/ast_control_supplemented_v3.report.json`：精确 AST-only 配额可行性报告；
+- `artifacts/ast_logic_supplement_v1.docker_audit.summary.json`：新增 297 条逻辑错误的 Docker 复审；
+- `artifacts/train_sft_ast_matched_v3_manifest.json`：AST-only 对照的哈希、训练和评测命令；
+- `artifacts/train_sft_ast_matched_v3_quality_tokenizer.json`：AST-only 对话长度审计；
+- `artifacts/humanevalfix_confirmation_v1.summary.json`：36 例追溯冻结确认集及其来源声明；
+- `artifacts/controlled_experiment_preflight.summary.json`：训练前总检查；
+- `artifacts/controlled_experiment_results_20261018.md`：精确 AST-only、Mixed seed43/44 和确认集的最终结果；
+- `artifacts/controlled_experiment_*_paired_20261018.json`：逐例 McNemar 配对分析；
+- `artifacts/humanevalfix_{ast_matched_v3_seed42,mixed_controlled_seed43,mixed_controlled_seed44}_{none,structured}.summary.json`：六个正式评测汇总。
 
 ### 第一阶段内部基线（MBPP）
 
@@ -393,21 +418,43 @@ repairbench evaluate `
 
 第一版训练数据主要来自 AST 变异，运行时错误占比较高。为检验数据分布是否限制了迁移能力，新增了一次预先规定的受控实验：使用同一个基础模型 `Qwen2.5-Coder-0.5B-Instruct`，只根据 MBPP 训练题目生成候选实现，不向生成器提供参考答案或测试；每题最多保留 2 个同时被公开测试和隐藏测试检测到、可解析且入口函数存在的错误。最终得到 469 个模型生成错误，其中逻辑错误 297、运行时错误 171、超时错误 1。
 
-混合集固定为 1241 条：保留 469 条模型错误，并从原 AST 变异数据中按 `boundary_condition=122`、`logic_error=267`、`runtime_error=383` 抽样 772 条。使用固定随机种子 42、相同的 3 epoch QLoRA 配置重新训练，未继续训练旧适配器。实际对话模板编码后的最长样本为 1534 tokens，低于训练上限 1536。构建、哈希和审计记录见 `artifacts/train_sft_mixed_controlled_manifest.json` 与 `artifacts/train_sft_mixed_controlled_quality.md`。
+混合集固定为 1241 条：保留 469 条模型错误，并从原 AST 变异数据中按 `boundary_condition=122`、`logic_error=267`、`runtime_error=383` 抽样 772 条。历史 Mixed seed42 使用固定随机种子 42、相同的 3 epoch QLoRA 配置重新训练，未继续训练旧适配器；本次受控复验另外完成了 Mixed seed43/44。实际对话模板编码后的最长样本为 1534 tokens，低于训练上限 1536。构建、哈希和审计记录见 `artifacts/train_sft_mixed_controlled_manifest.json` 与 `artifacts/train_sft_mixed_controlled_quality.md`。
 
 ### 受控分布对照的边界
 
-为了检验“混合数据收益是否只是错误类型分布变化”，我新增了一个只做数据审计的配额协议：把 Mixed 中的 `model_logic_error`/`model_runtime_error`/`model_timeout_error` 归一化为三类 AST 错误，再检查 AST-only 池能否复现相同配额。结果是 Mixed 的目标配额为 `boundary=122`、`logic=564`、`runtime=555`，而现有去重 AST 池只有 `122/267/852`，逻辑错误缺少 `297` 条，因此**严格同分布对照不可行**。审计报告固定记录输入文件哈希：`artifacts/ast_control_audit_v1.summary.json`。
+为了检验“混合数据收益是否只是错误类型分布变化”，我新增了一个只做数据审计的配额协议：把 Mixed 中的 `model_logic_error`/`model_runtime_error`/`model_timeout_error` 归一化为三类 AST 错误，再检查 AST-only 池能否复现相同配额。初始 AST-only 池只有 `122/267/852`，缺 `297` 条逻辑错误；随后新增的 297 条 AST 逻辑变异全部通过公开+隐藏测试审计且不复用旧代码，并使用 Docker 复审确认 297/297 条均被两套测试检测，最终精确对照达到 `boundary=122`、`logic=564`、`runtime=555`。审计报告为 `artifacts/ast_control_supplemented_v3.report.json` 和 `artifacts/ast_logic_supplement_v1.docker_audit.summary.json`，训练文件为 `data/processed/mbpp/train_sft_ast_matched_v3.jsonl`。
 
-脚本默认只报告可行性；`--mode exact` 在配额不足时返回非零并明确阻止训练，避免静默重复样本。`--mode maximal` 会生成按最短类别比例缩小的 586 条探索集（`57/267/262`），输出文件在本地 `data/processed/mbpp/` 下，报告为 `artifacts/ast_control_maximal_v1.summary.json`。该探索集只能用于诊断，不能替代 1241 条 Mixed 的正式结论，也不能把它称为完整的公平反事实。
+脚本默认只报告可行性；`--mode exact` 在配额不足时返回非零并明确阻止训练，避免静默重复样本。补齐后 exact 模式已成功生成 1241 条 AST-only 对照；本地使用实际 tokenizer 复核后，AST-only 训练对话最长 1525 tokens，Mixed 为 1534 tokens，均低于 1536 上限。QLoRA 与双条件 HumanEvalFix 命令和文件哈希见 `artifacts/train_sft_ast_matched_v3_manifest.json`。正式训练与评测已在远端完成，结果见 `artifacts/controlled_experiment_results_20261018.md`。
+
+新增 AST 逻辑样本的正式隔离复审可用本地 Docker 镜像执行：
+
+```powershell
+docker build -t repairbench-audit:python3.13 -f docker/audit/Dockerfile docker/audit
+$env:PYTHONPATH = "src"
+python scripts/audit_ast_logic_supplement_docker.py `
+  --tasks data/processed/mbpp/train_audited_tasks.jsonl `
+  --bugs data/processed/mbpp/train_bugs_ast_logic_supplement_v1.jsonl `
+  --output-summary artifacts/ast_logic_supplement_v1.docker_audit.summary.json `
+  --image repairbench-audit:python3.13
+```
+
+训练前可一次性复核数据哈希、Docker 审计、Tokenizer 长度和 36 例确认集冻结状态：
+
+```powershell
+python scripts/preflight_controlled_experiments.py
+```
+
+通过后只代表数据和评测前置条件就绪；本次远端训练和评测已另外记录在 manifest 与结果报告中。
 
 ```powershell
 python scripts/audit_ast_control.py `
   --mixed-sft data/processed/mbpp/train_sft_mixed_controlled.jsonl `
-  --ast-sft data/processed/mbpp/train_sft_v2_dedup.jsonl `
-  --ast-bugs data/processed/mbpp/train_bugs_v2_dedup.jsonl `
-  --output-summary artifacts/ast_control_audit_v1.summary.json `
-  --mode report
+  --ast-sft data/processed/mbpp/train_sft_ast_pool_v3.jsonl `
+  --ast-bugs data/processed/mbpp/train_bugs_ast_pool_v3.jsonl `
+  --output-summary artifacts/ast_control_supplemented_v3.report.json `
+  --output-sft data/processed/mbpp/train_sft_ast_matched_v3.jsonl `
+  --output-bugs data/processed/mbpp/train_bugs_ast_matched_v3.jsonl `
+  --mode exact
 ```
 
 ### 结果
@@ -450,7 +497,7 @@ python scripts/extract_on_policy_repairs.py `
   --summary artifacts/on_policy_later_success_summary.json
 ```
 
-需要诚实说明：HumanEvalFix 已在开发中被查看，不是最终盲测；目前只有一个训练 seed、模型规模和混合比例，反馈置乱也只有 5 个排列；混合时同时加入模型错误并减少合成运行时错误，尚不能拆分两者各自贡献。若继续，应扩大候选采样获得足量 on-policy 轨迹，并在从未用于开发的新修复集上验证。
+需要诚实说明：HumanEvalFix 已在开发中被查看，不是历史意义上的盲测；精确 AST-only 和 Mixed seed 43/44 已完成，但没有复现旧 seed42 的 72/71 点估计，精确 AST-only 与新 Mixed 的配对差异也未达显著。新增的 36 例确认集从冻结时起不得用于数据选择、checkpoint 选择或提示调参，但它来自已经参与开发分析的 143 例，因此应称为“追溯冻结确认集”，不能称为全新盲测。混合实验的收益来源仍不能仅凭当前 143 例确认。
 
 ## 数据、模型与方法来源
 

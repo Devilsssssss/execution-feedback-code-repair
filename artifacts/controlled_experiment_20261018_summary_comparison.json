@@ -1,0 +1,242 @@
+[
+  {
+    "label": "ast42",
+    "run_name": "outputs/qwen25-coder-05b-repair-qlora-ast-matched-v3",
+    "condition": "none",
+    "cases": 143,
+    "repair_at_1": 0.3986013986013986,
+    "repair_at_k": 0.3986013986013986,
+    "by_bug_type": {
+      "excess_logic": {
+        "cases": 25,
+        "repair_at_1": 0.2,
+        "repair_at_k": 0.2
+      },
+      "function_misuse": {
+        "cases": 7,
+        "repair_at_1": 0.2857142857142857,
+        "repair_at_k": 0.2857142857142857
+      },
+      "missing_logic": {
+        "cases": 27,
+        "repair_at_1": 0.2222222222222222,
+        "repair_at_k": 0.2222222222222222
+      },
+      "operator_misuse": {
+        "cases": 24,
+        "repair_at_1": 0.5,
+        "repair_at_k": 0.5
+      },
+      "value_misuse": {
+        "cases": 39,
+        "repair_at_1": 0.5641025641025641,
+        "repair_at_k": 0.5641025641025641
+      },
+      "variable_misuse": {
+        "cases": 21,
+        "repair_at_1": 0.47619047619047616,
+        "repair_at_k": 0.47619047619047616
+      }
+    }
+  },
+  {
+    "label": "mixed43",
+    "run_name": "outputs/qwen25-coder-05b-repair-qlora-mixed-controlled-seed43",
+    "condition": "none",
+    "cases": 143,
+    "repair_at_1": 0.42657342657342656,
+    "repair_at_k": 0.42657342657342656,
+    "by_bug_type": {
+      "excess_logic": {
+        "cases": 25,
+        "repair_at_1": 0.28,
+        "repair_at_k": 0.28
+      },
+      "function_misuse": {
+        "cases": 7,
+        "repair_at_1": 0.42857142857142855,
+        "repair_at_k": 0.42857142857142855
+      },
+      "missing_logic": {
+        "cases": 27,
+        "repair_at_1": 0.3333333333333333,
+        "repair_at_k": 0.3333333333333333
+      },
+      "operator_misuse": {
+        "cases": 24,
+        "repair_at_1": 0.5416666666666666,
+        "repair_at_k": 0.5416666666666666
+      },
+      "value_misuse": {
+        "cases": 39,
+        "repair_at_1": 0.48717948717948717,
+        "repair_at_k": 0.48717948717948717
+      },
+      "variable_misuse": {
+        "cases": 21,
+        "repair_at_1": 0.47619047619047616,
+        "repair_at_k": 0.47619047619047616
+      }
+    }
+  },
+  {
+    "label": "mixed44",
+    "run_name": "outputs/qwen25-coder-05b-repair-qlora-mixed-controlled-seed44",
+    "condition": "none",
+    "cases": 143,
+    "repair_at_1": 0.44755244755244755,
+    "repair_at_k": 0.44755244755244755,
+    "by_bug_type": {
+      "excess_logic": {
+        "cases": 25,
+        "repair_at_1": 0.28,
+        "repair_at_k": 0.28
+      },
+      "function_misuse": {
+        "cases": 7,
+        "repair_at_1": 0.2857142857142857,
+        "repair_at_k": 0.2857142857142857
+      },
+      "missing_logic": {
+        "cases": 27,
+        "repair_at_1": 0.37037037037037035,
+        "repair_at_k": 0.37037037037037035
+      },
+      "operator_misuse": {
+        "cases": 24,
+        "repair_at_1": 0.5833333333333334,
+        "repair_at_k": 0.5833333333333334
+      },
+      "value_misuse": {
+        "cases": 39,
+        "repair_at_1": 0.5384615384615384,
+        "repair_at_k": 0.5384615384615384
+      },
+      "variable_misuse": {
+        "cases": 21,
+        "repair_at_1": 0.47619047619047616,
+        "repair_at_k": 0.47619047619047616
+      }
+    }
+  },
+  {
+    "label": "ast42_structured",
+    "run_name": "outputs/qwen25-coder-05b-repair-qlora-ast-matched-v3",
+    "condition": "structured",
+    "cases": 143,
+    "repair_at_1": 0.38461538461538464,
+    "repair_at_k": 0.38461538461538464,
+    "by_bug_type": {
+      "excess_logic": {
+        "cases": 25,
+        "repair_at_1": 0.2,
+        "repair_at_k": 0.2
+      },
+      "function_misuse": {
+        "cases": 7,
+        "repair_at_1": 0.14285714285714285,
+        "repair_at_k": 0.14285714285714285
+      },
+      "missing_logic": {
+        "cases": 27,
+        "repair_at_1": 0.18518518518518517,
+        "repair_at_k": 0.18518518518518517
+      },
+      "operator_misuse": {
+        "cases": 24,
+        "repair_at_1": 0.4166666666666667,
+        "repair_at_k": 0.4166666666666667
+      },
+      "value_misuse": {
+        "cases": 39,
+        "repair_at_1": 0.5897435897435898,
+        "repair_at_k": 0.5897435897435898
+      },
+      "variable_misuse": {
+        "cases": 21,
+        "repair_at_1": 0.5238095238095238,
+        "repair_at_k": 0.5238095238095238
+      }
+    }
+  },
+  {
+    "label": "mixed43_structured",
+    "run_name": "outputs/qwen25-coder-05b-repair-qlora-mixed-controlled-seed43",
+    "condition": "structured",
+    "cases": 143,
+    "repair_at_1": 0.44755244755244755,
+    "repair_at_k": 0.44755244755244755,
+    "by_bug_type": {
+      "excess_logic": {
+        "cases": 25,
+        "repair_at_1": 0.4,
+        "repair_at_k": 0.4
+      },
+      "function_misuse": {
+        "cases": 7,
+        "repair_at_1": 0.7142857142857143,
+        "repair_at_k": 0.7142857142857143
+      },
+      "missing_logic": {
+        "cases": 27,
+        "repair_at_1": 0.25925925925925924,
+        "repair_at_k": 0.25925925925925924
+      },
+      "operator_misuse": {
+        "cases": 24,
+        "repair_at_1": 0.4583333333333333,
+        "repair_at_k": 0.4583333333333333
+      },
+      "value_misuse": {
+        "cases": 39,
+        "repair_at_1": 0.5384615384615384,
+        "repair_at_k": 0.5384615384615384
+      },
+      "variable_misuse": {
+        "cases": 21,
+        "repair_at_1": 0.47619047619047616,
+        "repair_at_k": 0.47619047619047616
+      }
+    }
+  },
+  {
+    "label": "mixed44_structured",
+    "run_name": "outputs/qwen25-coder-05b-repair-qlora-mixed-controlled-seed44",
+    "condition": "structured",
+    "cases": 143,
+    "repair_at_1": 0.45454545454545453,
+    "repair_at_k": 0.45454545454545453,
+    "by_bug_type": {
+      "excess_logic": {
+        "cases": 25,
+        "repair_at_1": 0.4,
+        "repair_at_k": 0.4
+      },
+      "function_misuse": {
+        "cases": 7,
+        "repair_at_1": 0.7142857142857143,
+        "repair_at_k": 0.7142857142857143
+      },
+      "missing_logic": {
+        "cases": 27,
+        "repair_at_1": 0.3333333333333333,
+        "repair_at_k": 0.3333333333333333
+      },
+      "operator_misuse": {
+        "cases": 24,
+        "repair_at_1": 0.4583333333333333,
+        "repair_at_k": 0.4583333333333333
+      },
+      "value_misuse": {
+        "cases": 39,
+        "repair_at_1": 0.5128205128205128,
+        "repair_at_k": 0.5128205128205128
+      },
+      "variable_misuse": {
+        "cases": 21,
+        "repair_at_1": 0.47619047619047616,
+        "repair_at_k": 0.47619047619047616
+      }
+    }
+  }
+]

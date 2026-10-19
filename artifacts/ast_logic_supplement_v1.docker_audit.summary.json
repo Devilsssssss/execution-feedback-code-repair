@@ -1,0 +1,26 @@
+{
+  "protocol": "ast-logic-supplement-v1-docker-audit",
+  "status": "pass",
+  "executor": "docker",
+  "image": "repairbench-audit:python3.13",
+  "workers": 6,
+  "timeout_seconds": 15.0,
+  "inputs": {
+    "tasks": {
+      "path": "data\\processed\\mbpp\\train_audited_tasks.jsonl",
+      "rows": 342,
+      "sha256": "731419f4dc32ce31ffef3388b069ebe7dba7aa5c0d43b2d7125e5a09283ec24c"
+    },
+    "bugs": {
+      "path": "data\\processed\\mbpp\\train_bugs_ast_logic_supplement_v1.jsonl",
+      "rows": 297,
+      "sha256": "087e24c84b9cd106ba5b436f5ba10de56b36a3faecc19238b4eb99bd5e5e253e"
+    }
+  },
+  "reference_checks": 342,
+  "reference_passes": 342,
+  "bug_checks": 297,
+  "bug_passes": 297,
+  "invalid_references": [],
+  "invalid_bugs": []
+}

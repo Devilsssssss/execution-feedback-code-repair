@@ -26,6 +26,18 @@ artifacts/*
 !artifacts/train_sft_mixed_controlled_quality.md
 !artifacts/ast_control_audit_v1.summary.json
 !artifacts/ast_control_maximal_v1.summary.json
+!artifacts/ast_control_supplemented_v3.report.json
+!artifacts/ast_logic_supplement_v1.docker_audit.summary.json
+!artifacts/controlled_experiment_preflight.summary.json
+!artifacts/controlled_experiment_20261018_summary_comparison.json
+!artifacts/controlled_experiment_results_20261018.md
+!artifacts/controlled_experiment_*_paired_20261018.json
+!artifacts/humanevalfix_*_seed43_*.summary.json
+!artifacts/humanevalfix_*_seed44_*.summary.json
+!artifacts/humanevalfix_ast_matched_v3_seed42_*.summary.json
+!artifacts/humanevalfix_confirmation_v1.summary.json
+!artifacts/train_sft_ast_matched_v3_manifest.json
+!artifacts/train_sft_ast_matched_v3_quality_tokenizer.json
 
 outputs/
 models/

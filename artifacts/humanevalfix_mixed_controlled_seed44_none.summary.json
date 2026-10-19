@@ -1,0 +1,42 @@
+{
+  "cases": 143,
+  "repair_at_1": 0.44755244755244755,
+  "repair_at_k": 0.44755244755244755,
+  "mean_repairs_used": 1.0,
+  "mean_generated_characters": 212.30769230769232,
+  "by_bug_type": {
+    "excess_logic": {
+      "cases": 25,
+      "repair_at_1": 0.28,
+      "repair_at_k": 0.28
+    },
+    "function_misuse": {
+      "cases": 7,
+      "repair_at_1": 0.2857142857142857,
+      "repair_at_k": 0.2857142857142857
+    },
+    "missing_logic": {
+      "cases": 27,
+      "repair_at_1": 0.37037037037037035,
+      "repair_at_k": 0.37037037037037035
+    },
+    "operator_misuse": {
+      "cases": 24,
+      "repair_at_1": 0.5833333333333334,
+      "repair_at_k": 0.5833333333333334
+    },
+    "value_misuse": {
+      "cases": 39,
+      "repair_at_1": 0.5384615384615384,
+      "repair_at_k": 0.5384615384615384
+    },
+    "variable_misuse": {
+      "cases": 21,
+      "repair_at_1": 0.47619047619047616,
+      "repair_at_k": 0.47619047619047616
+    }
+  },
+  "run_name": "outputs/qwen25-coder-05b-repair-qlora-mixed-controlled-seed44",
+  "condition": "none",
+  "feedback_permutation_seed": null
+}
