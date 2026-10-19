@@ -12,11 +12,22 @@
 
 我搭建了一个 Python 单函数代码修复系统，用公开测试验证错误和生成结构化反馈，并研究 AST 合成错误与模型真实生成错误对 QLoRA 微调效果的影响；历史 Mixed seed42 在 HumanEvalFix 的 143 个审计案例上达到 49.7% 结构化反馈修复率，但后续精确 AST-only 与 Mixed 多种子复验没有复现这一点估计。
 
-## 当前状态（2026-10-18）
+## 当前状态（2026-10-19）
 
 为检验“收益是否只是错误类型分布变化”，精确 AST-only 对照已经补齐到与 Mixed 相同的 `122/564/555` 配额，并完成公开/隐藏测试审计、Docker 复审、Tokenizer 长度审计、远端 QLoRA 训练和双条件 HumanEvalFix 评测。AST seed42 得到无反馈/结构化反馈 `57/143`、`55/143`；Mixed seed43 得到 `61/143`、`64/143`；Mixed seed44 得到 `64/143`、`65/143`。36 例追溯冻结确认集也已完成六个条件的评测。
 
 确认集来自已经参与开发分析的 143 例，因此不能称为历史盲测。它从冻结时起不再用于数据选择、checkpoint 选择或提示调参；本次训练复验完成后已按协议完成一次确认性评测。
+
+## 当前开放项
+
+主实验、AST-only 反事实、多 seed 复验、反馈置乱和追溯确认集均已完成。当前唯一未完成的是 `feedback-contract-sft-v3`：1241 条训练目标已经生成并通过一一对应审计，但服务器上的 QLoRA 训练、143 例主集评测、36 例确认集复核和 5 个置乱 seed 评测尚未运行。v1/v2 因超出 1536 token 训练上限已作废，不应引用其结果。协议、运行脚本和当前状态见 [反馈契约实验](docs/feedback_contract_experiment.md) 与 [实验索引](docs/experiment_index.md)。
+
+## 文件维护口径
+
+- 当前对外入口：`README.md`、`docs/project_brief.md`、`docs/experiment_index.md`。
+- 当前主线代码：`src/repairbench/`、`scripts/build_feedback_contract_sft.py`、`scripts/audit_feedback_contract_sft.py` 以及对应测试。
+- 历史实验脚本和摘要保留在 `scripts/`、`artifacts/`，用于复现已完成的 AST 对照、反馈置乱和训练前审计；它们不是新的结论，也不应被删除后再声称结果可复现。
+- 模型权重、逐例轨迹和大体积数据由 `.gitignore` 排除；Git 只保留协议、哈希和聚合摘要。
 
 ## 主要工作
 
