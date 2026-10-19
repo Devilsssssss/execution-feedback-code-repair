@@ -1,0 +1,20 @@
+{
+  "protocol": "feedback-contract-sft-v1",
+  "rows": 1241,
+  "tasks": 333,
+  "bug_types": {
+    "boundary_condition": 122,
+    "logic_error": 267,
+    "model_logic_error": 297,
+    "model_runtime_error": 171,
+    "model_timeout_error": 1,
+    "runtime_error": 383
+  },
+  "completion_contract_prefix": "# FEEDBACK_CONTRACT",
+  "reference_code_sha256": "2a5c04286e331efbe10e229b2289049e1c8fc3e67d6362bdf59ce69be1a5da8c",
+  "output_sha256": "237751f5234b25a8da118742310859dd27d01f16c3605b168b11b333ecac0cfb",
+  "target_change": "Only a deterministic feedback-derived comment is prepended to each reference code; prompts, bug IDs, task split, and reference implementation are unchanged.",
+  "input_sft_sha256": "022b1b49d19f52481eeb22a9b0c172bb4781de26ff8101cb4bf893d8d5ea47c4",
+  "input_bugs_sha256": "17e925081f4e0d1c7c23bc22162ba185bf995b08c4c9d8a496a62ebb910aeab1",
+  "input_tasks_sha256": "291b062d60fbb937b9076774ea1007a587aabbfbad0db57c518204b1caf5618f"
+}

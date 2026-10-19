@@ -19,6 +19,8 @@
 
 最终结论不是“执行反馈一定有效”。历史 seed42 曾提示加入经过执行审计的模型真实错误可能改善跨数据集修复，但精确 AST-only 与 Mixed seed43/44 的新对照没有给出稳定显著差异；当前 SFT 也尚未证明能稳定利用反馈。项目同时保留历史正结果和最新不确定性，避免只展示最高分。
 
+对外快速入口：[一页项目说明](docs/project_brief.md)。实验路线与状态见[实验索引](docs/experiment_index.md)；反馈契约 SFT 的冻结协议见[协议文档](docs/feedback_contract_experiment.md)。
+
 ## 目录
 
 ```text

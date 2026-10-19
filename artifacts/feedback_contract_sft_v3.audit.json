@@ -1,0 +1,9 @@
+{
+  "protocol": "feedback-contract-sft-v3",
+  "decision": "pass",
+  "original_rows": 1241,
+  "contract_rows": 1241,
+  "checked_rows": 1241,
+  "errors": [],
+  "contract_output_sha256": "237751f5234b25a8da118742310859dd27d01f16c3605b168b11b333ecac0cfb"
+}

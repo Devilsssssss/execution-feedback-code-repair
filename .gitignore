@@ -38,6 +38,8 @@ artifacts/*
 !artifacts/humanevalfix_confirmation_v1.summary.json
 !artifacts/train_sft_ast_matched_v3_manifest.json
 !artifacts/train_sft_ast_matched_v3_quality_tokenizer.json
+!artifacts/feedback_contract_sft_v3.summary.json
+!artifacts/feedback_contract_sft_v3.audit.json
 
 outputs/
 models/
