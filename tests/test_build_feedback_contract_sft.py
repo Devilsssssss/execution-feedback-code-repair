@@ -6,7 +6,7 @@ from repairbench.schemas import BugCase, RepairTask
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 
-from build_feedback_contract_sft import build_rows, load_jsonl  # noqa: E402
+from build_feedback_contract_sft import build_rows, load_jsonl
 
 
 def _write_jsonl(path: Path, rows: list[dict]) -> None:

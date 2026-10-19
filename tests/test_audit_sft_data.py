@@ -1,5 +1,7 @@
 from pathlib import Path
 
+import pytest
+
 from repairbench.io import load_bugs, load_tasks
 from scripts.audit_sft_data import _load_sft, build_report
 
@@ -7,6 +9,20 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def test_mbpp_train_sft_quality_report_has_no_sft_integrity_failures() -> None:
+    required_inputs = (
+        ROOT / "data/processed/mbpp/train_audited_tasks.jsonl",
+        ROOT / "data/processed/mbpp/validation_audited_tasks.jsonl",
+        ROOT / "data/processed/mbpp/test_audited_tasks.jsonl",
+        ROOT / "data/processed/mbpp/train_bugs.jsonl",
+        ROOT / "data/processed/mbpp/train_sft.jsonl",
+    )
+    missing = [str(path.relative_to(ROOT)) for path in required_inputs if not path.is_file()]
+    if missing:
+        pytest.skip(
+            "optional generated MBPP audit inputs are not checked into Git: "
+            + ", ".join(missing)
+        )
+
     report = build_report(
         load_tasks(ROOT / "data/processed/mbpp/train_audited_tasks.jsonl"),
         load_tasks(ROOT / "data/processed/mbpp/validation_audited_tasks.jsonl"),
