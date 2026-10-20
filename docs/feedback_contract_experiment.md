@@ -17,7 +17,7 @@ v1/v2 曾尝试更长的测试文本和 expected/actual 摘要。tokenizer 审�
 | Mixed baseline | 直接输出参考代码 | 42（已有 checkpoint）|
 | feedback-contract-v3 | 反馈契约注释 + 参考代码 | 42 |
 
-两组使用相同 QLoRA 超参数、HumanEvalFix 143 例主集、36 例追溯冻结确认集、`none`/`structured` 条件、greedy decoding、单轮最多 256 个新 token和 Bubblewrap 执行器。另对实验组运行 5 个无自配对反馈置乱 seed，单轮评测检查输出是否依赖反馈对应关系。
+两组使用相同 QLoRA 超参数、HumanEvalFix 审计后的 143 例主集（`audited_tasks.jsonl`/`audited_bugs.jsonl`）、36 例追溯冻结确认集、`none`/`structured` 条件、greedy decoding、单轮最多 256 个新 token 和 Bubblewrap 执行器。另对实验组运行 5 个无自配对反馈置乱 seed，单轮评测检查输出是否依赖反馈对应关系。
 
 ## 预注册判读
 
