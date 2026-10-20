@@ -1,6 +1,6 @@
 # 反馈契约 SFT 实验
 
-状态：**协议和 v3 训练数据已冻结并通过本地审计；远端训练与 HumanEvalFix 评测尚未完成。**
+状态：**v3 adapter 已完成远端训练；143 例主集评测进行中，确认集与反馈置乱评测等待主集完成。最终统计和结论尚未冻结。**
 
 ## 动机
 
@@ -18,6 +18,12 @@ v1/v2 曾尝试更长的测试文本和 expected/actual 摘要。tokenizer 审�
 | feedback-contract-v3 | 反馈契约注释 + 参考代码 | 42 |
 
 两组使用相同 QLoRA 超参数、HumanEvalFix 审计后的 143 例主集（`audited_tasks.jsonl`/`audited_bugs.jsonl`）、36 例追溯冻结确认集、`none`/`structured` 条件、greedy decoding、单轮最多 256 个新 token 和 Bubblewrap 执行器。另对实验组运行 5 个无自配对反馈置乱 seed，单轮评测检查输出是否依赖反馈对应关系。
+
+## 服务器执行记录
+
+2026-10-20：v3 在服务器完成 3 epoch QLoRA 训练，共 234 optimizer steps，训练 loss 0.291，runtime 1082 秒。adapter 和训练日志保存在实验机，不进入 Git。主集 `none` 条件已在**审计后 143 例**完成：repair@1 = 49/143（34.27%），repair@k = 51/143（35.66%）；`structured` 主集评测仍在运行，确认集和置乱评测待后续顺序启动。
+
+执行中发现早期命令曾误用 157 例全集；该次评测已判为无效，不进入任何比较或报告。当前正式脚本固定使用审计后的 143 例文件，且将新 token 上限固定为 256。正式结构化结果、确认集、置乱敏感性和任务级配对审计齐备后，再填写结论。
 
 ## 预注册判读
 
