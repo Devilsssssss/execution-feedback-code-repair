@@ -1,8 +1,8 @@
 # 执行反馈代码修复：实验结论报告
 
-更新日期：2026-10-18
+更新日期：2026-10-21
 
-> **当前状态说明（2026-10-18）**：本报告后续章节保留 2026-10-10 的历史 Mixed seed42 主实验，作为可追溯的原始结果；精确 AST-only seed42、Mixed seed43/44 和 36 例追溯冻结确认集的最新结果见 `artifacts/controlled_experiment_results_20261018.md`。新的 Mixed seeds 没有复现旧的 72/71 点估计，精确 AST-only 与新 Mixed 的配对差异也未达显著，因此旧的 50.3%/49.7% 不应被表述为稳定的多种子结论。
+> **当前状态说明（2026-10-21）**：本报告保留 2026-10-10 的历史 Mixed seed42 主实验和 2026-10-18 的受控复验；新增 feedback-contract-v3 的完整服务器训练与预注册评测见 `docs/feedback_contract_experiment.md`。v3 内部 structured 相对 none 的差值转正，但绝对修复率低于 Mixed checkpoint，五组反馈置乱也不支持稳定依赖正确反馈。因此 v3 是有方向性信号但整体负面的目标对照，不是稳定收益或 RL 证据。
 
 ## 结论摘要
 
@@ -10,8 +10,15 @@
 
 1. **历史 seed42 显示模型真实错误混入训练可能提升跨数据集修复。** 在相同的无反馈条件下，HumanEvalFix `repair@1` 从 42/143 提升到 72/143（+21.0 个百分点，配对 McNemar `p=2.27e-7`）；在相同的结构化反馈条件下，从 41/143 提升到 71/143（+21.0 个百分点，`p=6.04e-7`）。但精确 AST-only seed42、Mixed seed43/44 的新对照中，所有 AST-vs-Mixed 配对检验均未达显著，旧的 50.3%/49.7% 不能当成稳定的多种子结论。
 2. **当前 SFT 没有证明模型学会稳定利用执行反馈。** 混合数据模型在 HumanEvalFix 上无反馈为 72/143，结构化反馈为 71/143（`p=1.0`）；最多三轮修复时分别为 77/143 和 75/143（`p=0.804`）。5 个错配反馈组均低于正确反馈，均值为 64.4/143、范围 59–69，但只有 1/5 的逐次配对检验在未校正条件下 `p<0.05`。
+3. **feedback-contract-v3 改变了条件差值，但没有带来整体收益。** 同一 143 例主集上，v3 无反馈为 49/143、结构化反馈为 58/143（+6.29pp，任务级配对 `p=0.0636`）；36 例追溯确认集为 8/36、11/36（同方向但非盲测）。然而原 Mixed checkpoint 为 72/143、71/143，v3 的绝对 repair@1 分别低 16.08pp 和 9.09pp。五个 v3 反馈置乱 seed 为 58、49、52、59、57/143，均值 55/143，只有一组名义显著，不能证明稳定使用了正确反馈对应关系。
 
 因此，项目现阶段的可信定位应是：**真实模型错误驱动的数据构建与代码修复微调**。不能把结果包装成“执行反馈已显著提高修复率”。
+
+### feedback-contract-v3 对照
+
+这项补充实验将 1241 条 completion 从“直接参考实现”改成“先输出确定性的 `# FEEDBACK_CONTRACT` 摘要，再输出参考实现”，保持 prompt、bug ID、任务划分和参考代码不变。训练数据 1241/1241 行通过契约审计；服务器完成 3 epoch、234 个 optimizer steps，训练 loss 为 0.291。正式评测使用审计后的 143 例主集、36 例追溯确认集、greedy decoding、256 个新 token 和 Bubblewrap，9 份主/确认/置乱逐例结果均无 runner error。
+
+预注册候选门槛“主集至少 +5pp 且确认集同方向”满足，但它不能替代绝对基线和置乱对照。与 Mixed checkpoint 的描述性差中差为 +6.99pp（原 Mixed structured−none = −0.70pp，v3 = +6.29pp），尚非独立预注册检验；正确结论是“训练目标改变了模型对反馈条件的响应方向，同时损伤总体修复能力”。早期误用 157 条全集的评测已经排除，不进入任何报告。
 
 ## 实验对象
 
@@ -111,4 +118,7 @@ HumanEvalFix 不参与训练。公开 `check()` 被拆成独立断言，143 个�
 - 断言拆分后的任务与错误：`data/processed/humanevalfix_atomized/`
 - 混合训练集清单：`artifacts/train_sft_mixed_controlled_manifest.json`
 - 训练前质量报告：`artifacts/train_sft_mixed_controlled_quality.md`
-- 新适配器 SHA-256：`59b9b1a8881bcbac252282fb9504652974758110c9d50a4466a386985cbe38c8`
+- 历史 Mixed 适配器 SHA-256：`59b9b1a8881bcbac252282fb9504652974758110c9d50a4466a386985cbe38c8`；feedback-contract-v3 adapter 与运行哈希见 `artifacts/feedback_contract_v3_run_manifest.json`
+- feedback-contract-v3 协议与最终判读：`docs/feedback_contract_experiment.md`
+- feedback-contract-v3 训练/数据/评测哈希清单：`artifacts/feedback_contract_v3_run_manifest.json`
+- feedback-contract-v3 主集、确认集、Mixed 对照和置乱汇总：`artifacts/feedback_contract_v3_*`

@@ -1,0 +1,14 @@
+{
+  "cases": 143,
+  "permutation_seed": 43,
+  "fixed_points": 0,
+  "unique_targets": 143,
+  "unique_sources": 143,
+  "mapping_sha256": "38569903b55c0f6880f8eaa41530caf6fb3a70b517b1d76b73b9ec2a21d4a045",
+  "correct_feedback_successes": 58,
+  "shuffled_feedback_successes": 52,
+  "correct_only": 11,
+  "shuffled_only": 5,
+  "exact_mcnemar_p": 0.210113525390625,
+  "results_sha256": "648417ae1fc8759ad0b565ab68bc6f2a261beec044314f64e99fc942172e63d7"
+}

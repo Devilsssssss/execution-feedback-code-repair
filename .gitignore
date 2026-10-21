@@ -40,6 +40,12 @@ artifacts/*
 !artifacts/train_sft_ast_matched_v3_quality_tokenizer.json
 !artifacts/feedback_contract_sft_v3.summary.json
 !artifacts/feedback_contract_sft_v3.audit.json
+!artifacts/feedback_contract_v3_main_paired.json
+!artifacts/feedback_contract_v3_confirmation_paired.json
+!artifacts/feedback_contract_v3_shuffle_multiseed_summary.json
+!artifacts/feedback_contract_v3_vs_mixed_baseline_paired.json
+!artifacts/feedback_contract_v3_run_manifest.json
+!artifacts/feedback_contract_v3_shuffle_seed*_audit.json
 
 outputs/
 models/

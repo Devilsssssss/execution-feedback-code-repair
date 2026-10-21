@@ -11,13 +11,14 @@
 - 通过 Docker 或 Linux Bubblewrap 隔离执行模型生成的代码；
 - 输出逐样本轨迹和聚合指标，支持按错误类型分析。
 
-当前复现状态需要区分历史结果和 2026-10-18 的受控复验：
+当前复现状态需要区分历史结果、2026-10-18 的受控复验和 2026-10-20 完成的反馈契约对照：
 
 - 已完成：297 条新增 AST 逻辑错误、`boundary=122 / logic=564 / runtime=555` 的 1241 条精确 AST-only 对照、Docker 隔离复审、实际 tokenizer 长度审计，以及 AST seed 42、Mixed seed 43/44 的训练与双条件 HumanEvalFix 评测；
 - 已完成：36 例追溯冻结确认集的六个条件评测。它从冻结时起不再用于调参，但不能称为历史盲测；
+- 已完成：feedback-contract-v3 的 3 epoch QLoRA、143 例主集、36 例追溯确认集和 5 个反馈置乱 seed；v3 内部 structured−none 为 +6.29pp，但绝对能力低于 Mixed checkpoint，不能写成整体收益；
 - 旧的 50.3%/49.7% 是 Mixed seed 42 的历史单 seed 结果，seed 43/44 没有复现该点估计，精确 AST-only 与新 Mixed 的配对差异也未达显著。
 
-最终结论不是“执行反馈一定有效”。历史 seed42 曾提示加入经过执行审计的模型真实错误可能改善跨数据集修复，但精确 AST-only 与 Mixed seed43/44 的新对照没有给出稳定显著差异；当前 SFT 也尚未证明能稳定利用反馈。项目同时保留历史正结果和最新不确定性，避免只展示最高分。
+最终结论不是“执行反馈一定有效”。历史 seed42 曾提示加入经过执行审计的模型真实错误可能改善跨数据集修复，但精确 AST-only 与 Mixed seed43/44 的新对照没有给出稳定显著差异。feedback-contract-v3 使自身 structured 相对 none 提高 6.29pp，但绝对 repair@1 低于 Mixed checkpoint 16.08pp，五组置乱也不支持稳定依赖正确反馈。项目同时保留方向性信号、负结果和不确定性，避免只展示最高分。
 
 对外快速入口：[一页项目说明](docs/project_brief.md)。实验路线与状态见[实验索引](docs/experiment_index.md)；反馈契约 SFT 的冻结协议见[协议文档](docs/feedback_contract_experiment.md)。维护口径和面试讲法见[项目指南](PROJECT_GUIDE.md)。
 
@@ -74,6 +75,10 @@ Mixed seed 43 与 44 彼此的配对 McNemar 检验为无反馈 `p=0.6776`、结
 - `artifacts/controlled_experiment_results_20261018.md`：精确 AST-only、Mixed seed43/44 和确认集的最终结果；
 - `artifacts/controlled_experiment_*_paired_20261018.json`：逐例 McNemar 配对分析；
 - `artifacts/humanevalfix_{ast_matched_v3_seed42,mixed_controlled_seed43,mixed_controlled_seed44}_{none,structured}.summary.json`：六个正式评测汇总。
+- `docs/feedback_contract_experiment.md`：v3 协议、服务器运行记录和最终结论；
+- `artifacts/feedback_contract_v3_run_manifest.json`：v3 训练配置、数据/adapter/轨迹哈希和无效 157 条运行的排除记录；
+- `artifacts/feedback_contract_v3_main_paired.json`、`artifacts/feedback_contract_v3_confirmation_paired.json`：v3 主集与确认集配对分析；
+- `artifacts/feedback_contract_v3_shuffle_multiseed_summary.json`：v3 五个置乱 seed 的汇总与判读。
 
 ### 第一阶段内部基线（MBPP）
 

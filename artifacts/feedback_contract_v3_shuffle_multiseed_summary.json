@@ -1,0 +1,81 @@
+{
+  "cases": 143,
+  "correct_feedback": {
+    "successes": 58,
+    "repair_at_1": 0.40559440559440557
+  },
+  "shuffle_seeds": [
+    41,
+    42,
+    43,
+    44,
+    45
+  ],
+  "shuffled_feedback": {
+    "runs": {
+      "41": {
+        "successes": 58,
+        "repair_at_1": 0.40559440559440557,
+        "delta_from_correct_pp": 0.0,
+        "correct_only": 6,
+        "shuffled_only": 6,
+        "exact_mcnemar_p": 1.0,
+        "fixed_points": 0,
+        "unique_sources": 143,
+        "mapping_sha256": "963df6c026cb8d032116717863723c13030984f19cd27b87a00d58445142bf8d"
+      },
+      "42": {
+        "successes": 49,
+        "repair_at_1": 0.34265734265734266,
+        "delta_from_correct_pp": -6.2937062937062915,
+        "correct_only": 12,
+        "shuffled_only": 3,
+        "exact_mcnemar_p": 0.03515625,
+        "fixed_points": 0,
+        "unique_sources": 143,
+        "mapping_sha256": "0cd6daee4c62247a95e1e8860d7010e6b7047e5ddabc7c50aed2521377ed842f"
+      },
+      "43": {
+        "successes": 52,
+        "repair_at_1": 0.36363636363636365,
+        "delta_from_correct_pp": -4.195804195804192,
+        "correct_only": 11,
+        "shuffled_only": 5,
+        "exact_mcnemar_p": 0.210113525390625,
+        "fixed_points": 0,
+        "unique_sources": 143,
+        "mapping_sha256": "38569903b55c0f6880f8eaa41530caf6fb3a70b517b1d76b73b9ec2a21d4a045"
+      },
+      "44": {
+        "successes": 59,
+        "repair_at_1": 0.4125874125874126,
+        "delta_from_correct_pp": 0.6993006993007034,
+        "correct_only": 4,
+        "shuffled_only": 5,
+        "exact_mcnemar_p": 1.0,
+        "fixed_points": 0,
+        "unique_sources": 143,
+        "mapping_sha256": "4bb411e8b6eb42e792b4bf9cf6a7ccfc6827cb0eb27a6cd2e3304aecf23652ff"
+      },
+      "45": {
+        "successes": 57,
+        "repair_at_1": 0.3986013986013986,
+        "delta_from_correct_pp": -0.6993006993006978,
+        "correct_only": 9,
+        "shuffled_only": 8,
+        "exact_mcnemar_p": 1.0,
+        "fixed_points": 0,
+        "unique_sources": 143,
+        "mapping_sha256": "a197e5b1da9c4bd6e168f9755e6655d44cb574bebeb0421a0bacdc898e44673c"
+      }
+    },
+    "mean_successes": 55.0,
+    "mean_repair_at_1": 0.38461538461538464,
+    "min_successes": 49,
+    "max_successes": 59,
+    "population_std_successes": 3.847076812334269,
+    "all_runs_below_correct": false,
+    "uncorrected_p_below_0_05": 1
+  },
+  "inference": "directional_sensitivity_without_stable_significance; do_not_claim_feedback_improves_over_no_feedback"
+}

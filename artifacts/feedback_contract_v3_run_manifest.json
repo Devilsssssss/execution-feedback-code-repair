@@ -1,0 +1,117 @@
+{
+  "protocol": "feedback-contract-sft-v1",
+  "run_date": "2026-10-20",
+  "status": "completed",
+  "training": {
+    "base_model": "Qwen2.5-Coder-0.5B-Instruct",
+    "seed": 42,
+    "epochs": 3,
+    "optimizer_steps": 234,
+    "learning_rate": 0.0002,
+    "per_device_batch_size": 1,
+    "gradient_accumulation_steps": 16,
+    "max_length": 1536,
+    "quantization": "4-bit QLoRA",
+    "runtime_seconds": 1082,
+    "train_loss": 0.291,
+    "training_rows": 1241,
+    "training_data_sha256": "02370a6db3518d9ceb5b8969bd999169f70bc21c5239dfadffceb6c6ff63429e",
+    "adapter_file": "outputs/qwen25-coder-05b-repair-qlora-feedback-contract-v3/adapter_model.safetensors",
+    "adapter_sha256": "b663881fd803ce83560c489baba28c02c307bf902c4661bdac5e3dcbab4abf78"
+  },
+  "evaluation_protocol": {
+    "main_cases": 143,
+    "confirmation_cases": 36,
+    "main_set_files": [
+      "data/processed/humanevalfix_atomized/audited_tasks.jsonl",
+      "data/processed/humanevalfix_atomized/audited_bugs.jsonl"
+    ],
+    "confirmation_set_status": "retrospective development holdout; not blind",
+    "decoding": "greedy",
+    "max_new_tokens": 256,
+    "executor": "Bubblewrap",
+    "runner_errors": 0
+  },
+  "training_data_audit": {
+    "checked_rows": 1241,
+    "decision": "pass",
+    "contract_output_sha256": "237751f5234b25a8da118742310859dd27d01f16c3605b168b11b333ecac0cfb",
+    "reference_code_sha256": "2a5c04286e331efbe10e229b2289049e1c8fc3e67d6362bdf59ce69be1a5da8c"
+  },
+  "results": {
+    "artifacts/humanevalfix_atomized_mixed_none.jsonl": {
+      "role": "existing Mixed checkpoint reference",
+      "cases": 143,
+      "repair_at_1": "72/143",
+      "sha256": "a146bb4e3c61107b6c6a82819d2b836a554addcc729caf35170c36e507594471"
+    },
+    "artifacts/humanevalfix_atomized_mixed_structured.jsonl": {
+      "role": "existing Mixed checkpoint reference",
+      "cases": 143,
+      "repair_at_1": "71/143",
+      "sha256": "90e3069893d1fdcfae16c3b7a6d471b044d5581fceea5b5ccce7df9eeb300f19"
+    },
+    "artifacts/humanevalfix_feedback_contract_v3_none.jsonl": {
+      "condition": "none",
+      "cases": 143,
+      "repair_at_1": "49/143",
+      "sha256": "86cd08e8d5211f862c6f2ea2bc1730251f144c1d4cf697b37d03147680a0539d"
+    },
+    "artifacts/humanevalfix_feedback_contract_v3_structured.jsonl": {
+      "condition": "structured",
+      "cases": 143,
+      "repair_at_1": "58/143",
+      "sha256": "a589487fcf30f87299f01b8f17a288eaf7876300ae29fef65ad9b7bd044fdad0"
+    },
+    "artifacts/humanevalfix_confirmation_v1_feedback_contract_v3_none.jsonl": {
+      "condition": "none",
+      "cases": 36,
+      "repair_at_1": "8/36",
+      "sha256": "0502f729904d82d6a19084c08e9e253deac4962eaba71ebb975935809a1fe5cb"
+    },
+    "artifacts/humanevalfix_confirmation_v1_feedback_contract_v3_structured.jsonl": {
+      "condition": "structured",
+      "cases": 36,
+      "repair_at_1": "11/36",
+      "sha256": "cc603cae51d552f968c25960e50b883509ad18aa795a78863a8fccd281d68701"
+    },
+    "artifacts/humanevalfix_feedback_contract_v3_structured_shuffled_seed41.jsonl": {
+      "shuffle_seed": 41,
+      "cases": 143,
+      "repair_at_1": "58/143",
+      "sha256": "08417496999873b26ba4cb1fdb549c337778942625e744b6924cd00377de0f1d"
+    },
+    "artifacts/humanevalfix_feedback_contract_v3_structured_shuffled_seed42.jsonl": {
+      "shuffle_seed": 42,
+      "cases": 143,
+      "repair_at_1": "49/143",
+      "sha256": "a102ec9b8b77569746abe42f294c54713fb4311cb54ea6443d9bf649b2ac6963"
+    },
+    "artifacts/humanevalfix_feedback_contract_v3_structured_shuffled_seed43.jsonl": {
+      "shuffle_seed": 43,
+      "cases": 143,
+      "repair_at_1": "52/143",
+      "sha256": "648417ae1fc8759ad0b565ab68bc6f2a261beec044314f64e99fc942172e63d7"
+    },
+    "artifacts/humanevalfix_feedback_contract_v3_structured_shuffled_seed44.jsonl": {
+      "shuffle_seed": 44,
+      "cases": 143,
+      "repair_at_1": "59/143",
+      "sha256": "45c8b8e79c8e23a15fe9d70a191385642c144c3afe0fbc92540a5e3fa66f89c1"
+    },
+    "artifacts/humanevalfix_feedback_contract_v3_structured_shuffled_seed45.jsonl": {
+      "shuffle_seed": 45,
+      "cases": 143,
+      "repair_at_1": "57/143",
+      "sha256": "1909c40189c0e48409567e23a9f9a3ee6fb651f9aa8ac1acc03465e11a3d6b95"
+    }
+  },
+  "interpretation": "Within-v3 structured-vs-none direction is positive on main and retrospective confirmation sets, but absolute performance is below the existing Mixed checkpoint and five-seed shuffle evidence does not support stable dependence on correctly matched feedback.",
+  "invalid_runs": [
+    {
+      "cases": 157,
+      "reason": "Used the full HumanEvalFix file instead of the pre-audited 143-case main set.",
+      "disposition": "excluded from all comparisons and conclusions"
+    }
+  ]
+}
