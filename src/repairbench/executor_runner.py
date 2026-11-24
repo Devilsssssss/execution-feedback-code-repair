@@ -11,10 +11,88 @@ import contextlib
 import io
 import json
 import operator
+import os
 import sys
 import time
 import traceback
+from collections import deque
+from collections.abc import Iterator
+from contextlib import contextmanager
 from typing import Any
+
+MAX_CAPTURED_OUTPUT_CHARS = 2000
+
+
+class BoundedTextCapture(io.TextIOBase):
+    """Keep only a bounded tail of candidate output while preserving print()."""
+
+    def __init__(self, max_chars: int = MAX_CAPTURED_OUTPUT_CHARS) -> None:
+        if max_chars <= 0:
+            raise ValueError("max_chars must be positive")
+        self.max_chars = max_chars
+        self.truncated = False
+        self._chunks: deque[str] = deque()
+        self._length = 0
+
+    @property
+    def encoding(self) -> str:
+        return "utf-8"
+
+    def writable(self) -> bool:
+        return True
+
+    def write(self, value: str) -> int:
+        if not isinstance(value, str):
+            raise TypeError("write() argument must be str")
+        if not value:
+            return 0
+
+        self._chunks.append(value)
+        self._length += len(value)
+        overflow = self._length - self.max_chars
+        if overflow > 0:
+            self.truncated = True
+        while overflow > 0:
+            first = self._chunks[0]
+            if len(first) <= overflow:
+                self._chunks.popleft()
+                self._length -= len(first)
+                overflow -= len(first)
+            else:
+                self._chunks[0] = first[overflow:]
+                self._length -= overflow
+                overflow = 0
+        return len(value)
+
+    def getvalue(self) -> str:
+        value = "".join(self._chunks)
+        if not self.truncated:
+            return value
+        marker = "[output truncated; showing final characters]\n"
+        marker = marker[: self.max_chars]
+        tail_length = self.max_chars - len(marker)
+        tail = value[-tail_length:] if tail_length else ""
+        return marker + tail
+
+
+@contextmanager
+def suppress_native_output() -> Iterator[None]:
+    """Keep os.write(1/2, ...) from bypassing bounded Python stream capture."""
+    sys.stdout.flush()
+    sys.stderr.flush()
+    null_fd = os.open(os.devnull, os.O_WRONLY)
+    saved_fds: dict[int, int] = {}
+    try:
+        for fd in (1, 2):
+            saved_fds[fd] = os.dup(fd)
+            os.dup2(null_fd, fd)
+        yield
+    finally:
+        for fd, saved_fd in saved_fds.items():
+            os.dup2(saved_fd, fd)
+            os.close(saved_fd)
+        os.close(null_fd)
+
 
 OPERATORS = {
     ast.Eq: operator.eq,
@@ -75,8 +153,8 @@ def run(payload: dict[str, Any]) -> dict[str, Any]:
     tests = [str(test) for test in payload.get("tests", [])]
     failures: list[dict[str, Any]] = []
     passed = 0
-    captured_stdout = io.StringIO()
-    captured_stderr = io.StringIO()
+    captured_stdout = BoundedTextCapture()
+    captured_stderr = BoundedTextCapture()
 
     for test in tests:
         namespace: dict[str, Any] = {"__name__": "__candidate__"}
@@ -118,8 +196,8 @@ def run(payload: dict[str, Any]) -> dict[str, Any]:
         "passed": passed,
         "total": len(tests),
         "failures": failures,
-        "stdout": captured_stdout.getvalue()[-2000:],
-        "stderr": captured_stderr.getvalue()[-2000:],
+        "stdout": captured_stdout.getvalue(),
+        "stderr": captured_stderr.getvalue(),
         "duration_seconds": time.perf_counter() - started,
     }
 
@@ -127,7 +205,8 @@ def run(payload: dict[str, Any]) -> dict[str, Any]:
 def main() -> int:
     try:
         payload = json.load(sys.stdin)
-        result = run(payload)
+        with suppress_native_output():
+            result = run(payload)
     except BaseException as exc:  # noqa: BLE001 - always serialize runner failures
         result = {
             "status": "runner_error",

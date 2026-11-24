@@ -1,20 +1,18 @@
-"""Upload a local file to the training server via SFTP (paramiko).
+"""Upload a local file to the configured experiment server via SFTP.
 
 Usage:
   python scripts/remote_put.py <local_path> <remote_path>
 
-Credentials come from the QKT_SERVER_PASSWORD environment variable.
+Set QKT_SERVER_HOST, QKT_SERVER_USER, and QKT_SERVER_PASSWORD in the local
+environment. Optional settings are QKT_SERVER_PORT and QKT_SERVER_KNOWN_HOSTS.
+The default known-hosts file is ~/.ssh/known_hosts; unknown hosts are rejected.
 """
 
 from __future__ import annotations
 
-import os
 import sys
-import warnings
 
-warnings.filterwarnings("ignore")
-
-import paramiko
+from remote_ssh import connect_server
 
 
 def main() -> int:
@@ -22,27 +20,22 @@ def main() -> int:
         print("usage: remote_put.py <local> <remote>", file=sys.stderr)
         return 2
     local, remote = sys.argv[1], sys.argv[2]
-    password = os.environ.get("QKT_SERVER_PASSWORD")
-    if not password:
-        print("ERROR: set QKT_SERVER_PASSWORD first", file=sys.stderr)
+    try:
+        client = connect_server()
+    except (OSError, ValueError, RuntimeError) as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
         return 2
-    client = paramiko.SSHClient()
-    client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    client.connect(
-        "10.199.161.82",
-        port=22,
-        username="qianketong",
-        password=password,
-        timeout=15,
-        allow_agent=False,
-        look_for_keys=False,
-    )
-    sftp = client.open_sftp()
-    sftp.put(local, remote)
-    sftp.close()
-    client.close()
-    print(f"uploaded {local} -> {remote}")
-    return 0
+
+    try:
+        sftp = client.open_sftp()
+        try:
+            sftp.put(local, remote)
+        finally:
+            sftp.close()
+        print(f"uploaded {local} -> {remote}")
+        return 0
+    finally:
+        client.close()
 
 
 if __name__ == "__main__":

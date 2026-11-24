@@ -10,6 +10,7 @@ from .feedback import FeedbackCondition
 from .models import RepairModel
 from .prompts import build_repair_prompt
 from .schemas import BugCase, ExecutionResult, RepairTask
+from .validation import execute_checked, require_candidate_fails
 
 
 @dataclass(frozen=True)
@@ -48,13 +49,7 @@ class EvaluationRunner:
             raise ValueError("cannot permute feedback when the feedback condition is none")
 
     def _execute(self, code: str, tests: tuple[str, ...], setup_code: str, stage: str):
-        result = self.executor.execute(code, tests, setup_code=setup_code)
-        if result.status == "runner_error":
-            detail = result.failures[0].message if result.failures else "unknown runner error"
-            if result.stderr.strip():
-                detail = f"{detail}; stderr={result.stderr.strip()[-500:]}"
-            raise RuntimeError(f"evaluation infrastructure failed during {stage}: {detail}")
-        return result
+        return execute_checked(self.executor, code, tests, setup_code, stage=stage)
 
     def evaluate_case(self, task: RepairTask, bug: BugCase) -> dict[str, Any]:
         if task.task_id != bug.task_id:
@@ -69,6 +64,8 @@ class EvaluationRunner:
             public_before = self._execute(
                 current_code, task.public_tests, task.setup_code, "public_before"
             )
+            if repair_index == 1:
+                require_candidate_fails(public_before, f"bug {bug.bug_id} public tests")
             prompt_execution = public_before
             feedback_source_bug_id = bug.bug_id
             if self.feedback_overrides is not None:

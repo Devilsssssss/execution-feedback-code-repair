@@ -36,6 +36,32 @@ def test_executor_reports_runtime_error() -> None:
     assert result.failures[0].error_type == "NameError"
 
 
+def test_executor_bounds_large_python_stdout_and_stderr() -> None:
+    result = executor().execute(
+        "def noisy():\n    print('x' * 100_000)\n    print('y' * 100_000, file=__import__('sys').stderr)",
+        ["noisy(); assert True"],
+    )
+
+    assert result.all_passed
+    assert len(result.stdout) <= 2000
+    assert len(result.stderr) <= 2000
+    assert "output truncated" in result.stdout
+    assert "output truncated" in result.stderr
+    assert result.stdout.rstrip("\n").endswith("x" * 100)
+    assert result.stderr.rstrip("\n").endswith("y" * 100)
+
+
+def test_executor_keeps_native_fd_output_out_of_runner_protocol() -> None:
+    result = executor().execute(
+        "import os\nos.write(1, b'x' * 100_000)\nos.write(2, b'y' * 100_000)",
+        ["assert True"],
+    )
+
+    assert result.all_passed
+    assert result.stdout == ""
+    assert result.stderr == ""
+
+
 def test_executor_enforces_timeout() -> None:
     result = LocalSubprocessExecutor(timeout_seconds=0.2, allow_unsafe=True).execute(
         "while True:\n    pass\n", ["assert True"]

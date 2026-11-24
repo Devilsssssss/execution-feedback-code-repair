@@ -12,7 +12,9 @@ from .io import check_task_disjointness, index_tasks, load_bugs, load_tasks, wri
 from .models import HeuristicRepairModel, NoOpRepairModel, RepairModel, TransformersRepairModel
 from .mutations import generate_mutations
 from .prompts import build_repair_prompt
+from .provenance import build_evaluation_manifest, write_evaluation_manifest
 from .schemas import BugCase
+from .validation import execute_checked, require_candidate_fails, require_reference_passes
 
 
 def _add_executor_arguments(parser: argparse.ArgumentParser) -> None:
@@ -40,12 +42,40 @@ def command_generate_bugs(args: argparse.Namespace) -> int:
     executor = _executor(args)
     bugs: list[BugCase] = []
     for task in tasks:
+        reference_public = execute_checked(
+            executor,
+            task.canonical_solution,
+            task.public_tests,
+            task.setup_code,
+            stage=f"{task.task_id}:reference_public",
+        )
+        require_reference_passes(reference_public, f"{task.task_id}:reference_public")
+        reference_hidden = execute_checked(
+            executor,
+            task.canonical_solution,
+            task.hidden_tests,
+            task.setup_code,
+            stage=f"{task.task_id}:reference_hidden",
+        )
+        require_reference_passes(reference_hidden, f"{task.task_id}:reference_hidden")
+
         accepted = 0
         for mutation in generate_mutations(task.canonical_solution):
-            result = executor.execute(
-                mutation.code, task.public_tests, setup_code=task.setup_code
+            public_result = execute_checked(
+                executor,
+                mutation.code,
+                task.public_tests,
+                task.setup_code,
+                stage=f"{task.task_id}:{mutation.mutation_id}:public",
             )
-            if result.all_passed:
+            hidden_result = execute_checked(
+                executor,
+                mutation.code,
+                task.hidden_tests,
+                task.setup_code,
+                stage=f"{task.task_id}:{mutation.mutation_id}:hidden",
+            )
+            if public_result.all_passed or hidden_result.all_passed:
                 continue
             bugs.append(
                 BugCase(
@@ -54,7 +84,7 @@ def command_generate_bugs(args: argparse.Namespace) -> int:
                     buggy_code=mutation.code,
                     bug_type=mutation.bug_type,
                     mutation=mutation.mutation_id,
-                    metadata={"public_failure": result.to_dict()},
+                    metadata={"public_failure": public_result.to_dict()},
                 )
             )
             accepted += 1
@@ -73,23 +103,38 @@ def command_validate(args: argparse.Namespace) -> int:
     failures: list[str] = []
 
     for task in tasks:
-        reference_public = executor.execute(
-            task.canonical_solution, task.public_tests, setup_code=task.setup_code
-        )
-        reference_hidden = executor.execute(
-            task.canonical_solution, task.hidden_tests, setup_code=task.setup_code
-        )
-        if not reference_public.all_passed or not reference_hidden.all_passed:
-            failures.append(f"reference solution failed for {task.task_id}")
+        for split, tests in (
+            ("public", task.public_tests),
+            ("hidden", task.hidden_tests),
+        ):
+            stage = f"{task.task_id}:reference_{split}"
+            try:
+                reference = execute_checked(
+                    executor, task.canonical_solution, tests, task.setup_code, stage=stage
+                )
+                require_reference_passes(reference, stage)
+            except (RuntimeError, ValueError) as exc:
+                failures.append(str(exc))
 
     for bug in bugs:
         task = task_index.get(bug.task_id)
         if task is None:
             failures.append(f"bug {bug.bug_id} references missing task {bug.task_id}")
             continue
-        public_result = executor.execute(bug.buggy_code, task.public_tests, task.setup_code)
-        if public_result.all_passed:
-            failures.append(f"bug {bug.bug_id} does not fail any public test")
+        results = {}
+        for split, tests in (("public", task.public_tests), ("hidden", task.hidden_tests)):
+            stage = f"{bug.bug_id}:{split}"
+            try:
+                results[split] = execute_checked(
+                    executor, bug.buggy_code, tests, task.setup_code, stage=stage
+                )
+            except RuntimeError as exc:
+                failures.append(str(exc))
+        for split, result in results.items():
+            try:
+                require_candidate_fails(result, f"bug {bug.bug_id} {split} tests")
+            except ValueError as exc:
+                failures.append(str(exc))
 
     report = {"tasks": len(tasks), "bugs": len(bugs), "valid": not failures, "failures": failures}
     print(json.dumps(report, indent=2))
@@ -108,13 +153,39 @@ def command_build_sft(args: argparse.Namespace) -> int:
     bugs = load_bugs(args.bugs)
     executor = _executor(args)
     records: list[dict[str, Any]] = []
+    validated_references: set[str] = set()
     for bug in bugs:
         task = tasks.get(bug.task_id)
         if task is None:
             raise ValueError(f"bug {bug.bug_id} references unknown task {bug.task_id}")
-        public_result = executor.execute(bug.buggy_code, task.public_tests, task.setup_code)
-        if public_result.all_passed:
-            continue
+        if task.task_id not in validated_references:
+            for split, tests in (
+                ("public", task.public_tests),
+                ("hidden", task.hidden_tests),
+            ):
+                stage = f"{task.task_id}:reference_{split}"
+                reference = execute_checked(
+                    executor, task.canonical_solution, tests, task.setup_code, stage=stage
+                )
+                require_reference_passes(reference, stage)
+            validated_references.add(task.task_id)
+
+        public_result = execute_checked(
+            executor,
+            bug.buggy_code,
+            task.public_tests,
+            task.setup_code,
+            stage=f"{bug.bug_id}:public",
+        )
+        hidden_result = execute_checked(
+            executor,
+            bug.buggy_code,
+            task.hidden_tests,
+            task.setup_code,
+            stage=f"{bug.bug_id}:hidden",
+        )
+        require_candidate_fails(public_result, f"bug {bug.bug_id} public tests")
+        require_candidate_fails(hidden_result, f"bug {bug.bug_id} hidden tests")
         prompt = build_repair_prompt(
             task, bug.buggy_code, public_result, FeedbackCondition.STRUCTURED
         )
@@ -157,9 +228,14 @@ def _run_evaluation(
             task = tasks.get(bug.task_id)
             if task is None:
                 raise ValueError(f"bug {bug.bug_id} references unknown task {bug.task_id}")
-            execution = executor.execute(bug.buggy_code, task.public_tests, task.setup_code)
-            if execution.status == "runner_error":
-                raise RuntimeError(f"failed to collect initial feedback for {bug.bug_id}")
+            execution = execute_checked(
+                executor,
+                bug.buggy_code,
+                task.public_tests,
+                task.setup_code,
+                stage=f"{bug.bug_id}:initial_public",
+            )
+            require_candidate_fails(execution, f"bug {bug.bug_id} public tests")
             initial_executions[bug.bug_id] = execution
         feedback_overrides = build_feedback_derangement(initial_executions, permutation_seed)
     runner = EvaluationRunner(
@@ -194,7 +270,18 @@ def _run_evaluation(
     summary["feedback_permutation_seed"] = permutation_seed
     summary_path = Path(args.output).with_suffix(".summary.json")
     summary_path.write_text(json.dumps(summary, indent=2), encoding="utf-8")
+    manifest_path = Path(args.output).with_suffix(".manifest.json")
+    manifest = build_evaluation_manifest(
+        args,
+        model,
+        executor,
+        run_name=run_name,
+        records_path=args.output,
+        summary_path=summary_path,
+    )
+    write_evaluation_manifest(manifest_path, manifest)
     print(json.dumps(summary, indent=2))
+    print(json.dumps({"manifest": str(manifest_path)}, indent=2))
     return 0
 
 
@@ -221,14 +308,18 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="repairbench")
     subparsers = parser.add_subparsers(dest="command", required=True)
 
-    generate = subparsers.add_parser("generate-bugs", help="create controlled failing programs")
+    generate = subparsers.add_parser(
+        "generate-bugs", help="create programs that fail both public and hidden tests"
+    )
     generate.add_argument("--tasks", required=True)
     generate.add_argument("--output", required=True)
     generate.add_argument("--per-task", type=int, default=3)
     _add_executor_arguments(generate)
     generate.set_defaults(func=command_generate_bugs)
 
-    validate = subparsers.add_parser("validate", help="validate tasks, references, and bugs")
+    validate = subparsers.add_parser(
+        "validate", help="check passing references and bugs detected by both test splits"
+    )
     validate.add_argument("--tasks", required=True)
     validate.add_argument("--bugs", required=True)
     _add_executor_arguments(validate)
@@ -238,14 +329,18 @@ def build_parser() -> argparse.ArgumentParser:
     splits.add_argument("task_files", nargs="+", help="two or more task JSONL files")
     splits.set_defaults(func=command_check_splits)
 
-    sft = subparsers.add_parser("build-sft", help="build prompt-completion SFT records")
+    sft = subparsers.add_parser(
+        "build-sft", help="build SFT records from bugs failing public and hidden tests"
+    )
     sft.add_argument("--tasks", required=True)
     sft.add_argument("--bugs", required=True)
     sft.add_argument("--output", required=True)
     _add_executor_arguments(sft)
     sft.set_defaults(func=command_build_sft)
 
-    evaluate = subparsers.add_parser("evaluate", help="evaluate a local Hugging Face model")
+    evaluate = subparsers.add_parser(
+        "evaluate", help="evaluate a local Hugging Face model and write a run manifest"
+    )
     evaluate.add_argument("--tasks", required=True)
     evaluate.add_argument("--bugs", required=True)
     evaluate.add_argument("--output", required=True)
@@ -270,7 +365,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     noop = subparsers.add_parser(
         "evaluate-noop",
-        help="run a no-change control to validate the evaluation pipeline",
+        help="run a no-change control and write a run manifest",
     )
     noop.add_argument("--tasks", required=True)
     noop.add_argument("--bugs", required=True)
@@ -283,7 +378,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     heuristic = subparsers.add_parser(
         "evaluate-heuristic",
-        help="run an interpretable NameError-only repair baseline",
+        help="run a NameError-only baseline and write a run manifest",
     )
     heuristic.add_argument("--tasks", required=True)
     heuristic.add_argument("--bugs", required=True)

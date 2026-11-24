@@ -1,24 +1,24 @@
 # Execution-Feedback Code Repair
 
-一个研究执行反馈与小型代码模型修复能力的实验项目：评估模型能否利用公开测试的执行反馈，修复 Python 单函数中的逻辑与运行时错误。
+本项目研究一个具体问题：小型代码模型能否利用公开测试产生的执行反馈，修复 Python 单函数中的逻辑错误和运行时错误。实验链路覆盖受控错误注入、反馈构造、QLoRA 微调，以及只用隐藏测试计分的独立评测。
 
-历史主实验已经完成数据构建、QLoRA 训练和独立测试集评测；精确 AST-only 反事实对照和 Mixed 多种子复验也已完成。已经完成的基础设施包括：
+项目重点是让实验可复核，而不只是报告一个最高分：训练与评测按题目隔离；AST 错误注入有记录；公开反馈与隐藏评分严格分开；模型生成代码通过 Docker 或 Linux Bubblewrap 隔离执行；逐样本轨迹支持按错误类型和实验条件复查。
 
-- 按题目划分训练/评测数据，阻止同题泄漏；
-- 用 AST 进行可追踪的受控错误注入；
-- 严格分离可反馈的公开测试和只用于最终评分的隐藏测试；
-- 统一比较无反馈、原始反馈、结构化反馈和 LoRA 微调四种条件；
-- 通过 Docker 或 Linux Bubblewrap 隔离执行模型生成的代码；
-- 输出逐样本轨迹和聚合指标，支持按错误类型分析。
+## 当前证据与结论
 
-当前复现状态需要区分历史结果、2026-10-18 的受控复验和 2026-10-20 完成的反馈契约对照：
+- 历史 Mixed seed 42 在 HumanEvalFix 上得到 `72/143`（50.3%），高于同一时期的 AST-only 单 seed 结果；这是一条值得继续检验的信号，不是稳定结论。
+- 后续精确 AST-only 对照和 Mixed seed 43/44 复验未能重现该差距；配对检验也未显示稳定显著优势。
+- feedback-contract-v3 中，structured 相对 none 提高 6.29 个百分点，但其绝对修复率仍低于历史 Mixed checkpoint，反馈置乱实验也没有证明模型稳定依赖正确反馈。
 
-- 已完成：297 条新增 AST 逻辑错误、`boundary=122 / logic=564 / runtime=555` 的 1241 条精确 AST-only 对照、Docker 隔离复审、实际 tokenizer 长度审计，以及 AST seed 42、Mixed seed 43/44 的训练与双条件 HumanEvalFix 评测；
-- 已完成：36 例追溯冻结确认集的六个条件评测。它从冻结时起不再用于调参，但不能称为历史盲测；
-- 已完成：feedback-contract-v3 的 3 epoch QLoRA、143 例主集、36 例追溯确认集和 5 个反馈置乱 seed；v3 内部 structured−none 为 +6.29pp，但绝对能力低于 Mixed checkpoint，不能写成整体收益；
-- 旧的 50.3%/49.7% 是 Mixed seed 42 的历史单 seed 结果，seed 43/44 没有复现该点估计，精确 AST-only 与新 Mixed 的配对差异也未达显著。
+因此，本项目目前不能得出“执行反馈带来稳定修复收益”的结论。更稳妥的表述是：训练错误分布曾带来方向性提升，但多 seed 对照尚未确认这一提升；反馈学习本身仍未得到证实。旧的 `50.3%/49.7%` 应明确标注为 Mixed seed 42 的历史单 seed 结果。
 
-最终结论不是“执行反馈一定有效”。历史 seed42 曾提示加入经过执行审计的模型真实错误可能改善跨数据集修复，但精确 AST-only 与 Mixed seed43/44 的新对照没有给出稳定显著差异。feedback-contract-v3 使自身 structured 相对 none 提高 6.29pp，但绝对 repair@1 低于 Mixed checkpoint 16.08pp，五组置乱也不支持稳定依赖正确反馈。项目同时保留方向性信号、负结果和不确定性，避免只展示最高分。
+## 已完成工作
+
+- 构建含 `boundary=122 / logic=564 / runtime=555` 的精确 AST-only 对照，并补齐 297 条逻辑错误样本；
+- 完成 AST-only seed 42、Mixed seed 43/44 的训练和 HumanEvalFix 双条件评测；
+- 完成 36 例追溯冻结确认集评测。该集合只从冻结时起隔离，不能称为历史盲测；
+- 完成 feedback-contract-v3 的 3 epoch QLoRA、主集与确认集评测，以及 5 个反馈置乱 seed；
+- 完成执行隔离复审、tokenizer 长度审计和训练数据质量审计。
 
 对外快速入口：[一页项目说明](docs/project_brief.md)。实验路线与状态见[实验索引](docs/experiment_index.md)；反馈契约 SFT 的冻结协议见[协议文档](docs/feedback_contract_experiment.md)。维护口径和面试讲法见[项目指南](PROJECT_GUIDE.md)。
 
